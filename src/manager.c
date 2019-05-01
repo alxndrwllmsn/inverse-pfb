@@ -18,12 +18,14 @@ int main(int argc, char *argv[])
 
     //Initialise variables
     char *parfile = argv[1];
-    struct parameters pars;
+    struct parameters pars = {"notdfile","notffile","notoutfile",-1,-1,-1,-1,-1,-1,-1};
 
     //read parameter file
-    // pars = getpars(parfile);
+    pars = getpars(parfile);
 
     //check parameters
+    checkpars(pars);
+
     printf("datafile: %s\n"
             "filterfile: %s\n"
             "outputfile: %s\n"

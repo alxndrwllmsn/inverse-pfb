@@ -199,3 +199,70 @@ void write_output(char filename[],int8_t array[],int arraysize,char mode[2])
     fwrite(array,arraysize * sizeof *array, 1, of);
     fclose(of);
 }
+
+void checkpars(struct parameters pars)
+{
+    //Initialise variables
+    int a = 0;
+
+    //Check each parameter against initialised values
+    if(strcmp(pars.datafname,"notdfile") == 0)
+    {
+        printf("datafile not specified\n");
+        a=1;
+    }
+    if(strcmp(pars.filterfname,"notffile") == 0)
+    {
+        printf("filterfile not specified\n");
+        a=1;
+    }
+    if(strcmp(pars.outputfname,"notoutfile") == 0)
+    {
+        printf("outputfile not specified\n");
+        a=1;
+    }
+    if(pars.filterlen == -1)
+    {
+        printf("filter_length not specified\n");
+        a=1;
+    }
+    if(pars.filterchans == -1)
+    {
+        printf("filter_chans not specified\n");
+        a=1;
+    }
+    if(pars.nsamples == -1)
+    {
+        printf("nsamples not specified\n");
+        a=1;
+    }
+    if(pars.nchannels == -1)
+    {
+        printf("nchannels not specified\n");
+        a=1;
+    }
+    if(pars.firstchan == -1)
+    {
+        printf("firstchan not specified\n");
+        a=1;
+    }
+    if(pars.ntiles == -1)
+    {
+        printf("ntiles not specified\n");
+        a=1;
+    }
+    if(pars.tile == -1)
+    {
+        printf("tile not specified\n");
+        a=1;
+    }
+    if(a)
+    {
+        printf("Please specify each parameter and try again\n");
+        abort();
+    }
+    else
+    {
+        printf("All parameters specified.\n");
+    }
+}

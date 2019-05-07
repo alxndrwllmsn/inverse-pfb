@@ -19,6 +19,10 @@ int main(int argc, char *argv[])
     //Initialise variables
     char *parfile = argv[1];
     struct parameters pars = {"notdfile","notffile","notoutfile",-1,-1,-1,-1,-1,-1,-1};
+    struct dsampled ds;
+    int memAv, ntaps;
+    int16_t *fdata;
+    uint8_t *data;
 
     //read parameter file
     pars = getpars(parfile);
@@ -39,22 +43,83 @@ int main(int argc, char *argv[])
             pars.filterlen, pars.filterchans, pars.nsamples, pars.nchannels,
             pars.firstchan, pars.ntiles, pars.tile);
 
-
-
-    //check number of sections (based on memory)
-
     //read filter
+    long int flength = pars.filterlen;
+    char *fname = pars.filterfname;
+
+    fdata = (int16_t *)malloc(flength * sizeof *fdata);
+    read_filter(fname, fdata, flength);
+
+    FILE *test = fopen("testing/ftest.dat", "w");
+    fwrite(fdata, flength * sizeof *fdata, 1, test);
+    fclose(test);
 
     //import wisdom
-
-    //polyphase pad and fft filter
+    if(exists("ipfbwisdom.ws"))
+    {
+        if(fftw_import_wisdom_from_filename("ipfbwisdom.ws")==0)
+        {
+            printf("Wisdom was not loaded correctly, this may take a while\n");
+        }
+    }
+    else
+    {
+        printf("Wisdom file does not exist, this may take a while. A new\n"
+            "wisdom file will be created after this run.\n");
+    }
 
     //determine new sample rate
+    int fchans = pars.filterchans;
+    int firstchan = pars.firstchan;
+    int nchans = pars.nchannels;
+
+    ds = find_downsampled(fchans,firstchan, nchans);
+
+    //polyphase pad and fft filter
+    ntaps = (int)flength/fchans;
+    int fact2 = ds.factor*2;
+
+    float qrm[fact2][ntaps];
+
+    for (int r=0;r<fact2;r++)
+    {
+        for (int n=0;n<ntaps;n++)
+        {
+            qrm[r][n] = (float)fdata[n*fchans + r*((int)fchans/(fact2))];
+        }
+    }
+
+    FILE *test2 = fopen("testing/ftest2.dat", "w");
+    printf("factor*2:%d, ntaps:%d\n",fact2,ntaps);
+    fwrite(qrm, fact2*ntaps * sizeof(float), 1, test2);
+    fclose(test2);
+
+    //check flip
+    int flip = ((int)ds.high/ds.factor+1)%2;
 
     //open file
+    FILE *dfile = fopen(pars.datafname,"r");
+    if (dfile==NULL)
+    {
+        printf("The datafile was not found\n");
+        abort();
+    }
 
+    //check available memory
+    memAv = checkmem();
+    printf("Memory and Swap available: %d kB\n", memAv);
+
+    //check number of sections (based on memory)
+    int nsections = 1;
+    int sectionSize = (int)pars.nsamples/nsections;
+
+    //allocate memory for data
+    data = (uint8_t *)malloc(sectionSize * nchannels *sizeof *data);
     //loop over sections-> for each section
+    for(int i = 0;i<nsections;i++)
+    {
         //read section from file
+        read_vcs(dfile, data, sectionSize);
 
         //flip or not
 
@@ -80,5 +145,8 @@ int main(int argc, char *argv[])
 
         //write section to file
 
+    }
     //clean up
+    fclose(dfile);
+    free(fdata);
 }

@@ -113,37 +113,21 @@ struct parameters getpars(char *parfname) /*returns the values from a parameter
     return pars;
 }
 
-void read_vcs(char *filename, uint8_t data[],int data_length) /*reads the data from
+void read_vcs(FILE *file, uint8_t data[],int data_length) /*reads the data from
                                                             the vcs file*/
 {
     //open file and variable Initialisation
-    FILE *fp = fopen(filename,"r");
     uint8_t *buffer;
-    unsigned long fileLen;
     int i;
 
-    //check length of file and compare to size of array
-    fseek(fp, 0, SEEK_END);
-    fileLen = ftell(fp);
-    if(fileLen != data_length){
-        printf("The entered dimensions do not match the number of datapoints "
-        "within the file. Please check that the dimensions equal the file "
-        "length %ld. The dimensions entered have %d datapoints.\n",fileLen,
-        data_length);
-        abort();
-    }
-    fseek(fp, 0, SEEK_SET);
-
     //Read file into buffer as uint8_t
-    buffer = (uint8_t *)malloc(fileLen * sizeof(uint8_t));
-    if(fread(buffer, fileLen * sizeof(uint8_t), 1, fp)==0)
+    buffer = (uint8_t *)malloc(data_length * sizeof(uint8_t));
+    if(fread(buffer, data_length * sizeof(uint8_t), 1, file)==0)
     {
         printf("Error reading data file\n");
         abort();
     }
-    fclose(fp);
 
-    //convert uint8_t to int and save to data (not the most efficients)
     for(i=0;i<data_length;i++){
         data[i] = buffer[i];
     }
@@ -265,4 +249,45 @@ void checkpars(struct parameters pars)
     {
         printf("All parameters specified.\n");
     }
+}
+
+int checkmem(void)
+{
+    //Initialise variables
+    FILE *memfile;
+    char buffer[50];
+    int memAv, swFree;
+
+    //Read file
+    memfile = fopen("/proc/meminfo", "r");
+    while(!feof(memfile))
+    {
+        if(fscanf(memfile, "%s", buffer)==0)
+        {
+            printf("Error reading memfile.\n");
+            abort();
+        }
+        if(strcmp(buffer,"MemAvailable:") == 0)
+        {
+            if(fscanf(memfile, "%s", buffer)==0)
+            {
+                printf("Error reading memory value\n");
+                abort();
+            }
+            memAv = (int)strtol(buffer, NULL, 10);
+        }
+        else if(strcmp(buffer, "SwapFree:")==0)
+        {
+            if(fscanf(memfile, "%s", buffer)==0)
+            {
+                printf("Error reading swap value\n");
+                abort();
+            }
+            swFree = (int)strtol(buffer, NULL, 10);
+        }
+    }
+    fclose(memfile);
+    //calculate memory and return
+    memAv = memAv + swFree;
+    return memAv;
 }

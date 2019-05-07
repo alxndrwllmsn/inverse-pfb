@@ -19,7 +19,10 @@ $(ODIR)/%.o: %.c $(DEPS)
 ../ipfb: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
-.PHONY: clean
+.PHONY: clean debug
+
+debug: CFLAGS += -g
+debug: ../ipfb
 
 clean:
 	rm -f $(ODIR)/*.o ../ipfb

@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
     predata = (float *)malloc(2 * ntaps * fact2 * sizeof *predata);
 
     strcpy(infotextcat,pars.datadir);
-    sprintf(buffer,"%d",0);
+    sprintf(buffer,"%d",pars.tile);
     strcat(infotextcat,buffer);
     strcat(infotextcat,".dat");
     ofile = fopen(infotextcat,"w");

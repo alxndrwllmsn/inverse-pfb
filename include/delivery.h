@@ -3,7 +3,7 @@
 
 struct parameters
 {
-    char datafname[50];
+    char datadir[50];
     char filterfname[50];
     char outputfname[50];
     long filterlen;

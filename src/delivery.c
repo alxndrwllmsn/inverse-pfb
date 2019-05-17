@@ -21,9 +21,9 @@ struct parameters getpars(char *parfname) /*returns the values from a parameter
             printf("Error reading parameter names.\n");
             abort();
         }
-        if(strcmp(buff,"datafile") == 0)
+        if(strcmp(buff,"datadir") == 0)
         {
-            if(fscanf(pf, "%s", pars.datafname)==0)
+            if(fscanf(pf, "%s", pars.datadir)==0)
             {
                 printf("Error reading %s\n",buff );
                 abort();
@@ -190,7 +190,7 @@ void checkpars(struct parameters pars)
     int a = 0;
 
     //Check each parameter against initialised values
-    if(strcmp(pars.datafname,"notdfile") == 0)
+    if(strcmp(pars.datadir,"notdfile") == 0)
     {
         printf("datafile not specified\n");
         a=1;

@@ -1,5 +1,5 @@
 IDIR = ../include
-CC=gcc
+CC=cc
 CFLAGS=-I$(IDIR) -O3
 
 ODIR=obj

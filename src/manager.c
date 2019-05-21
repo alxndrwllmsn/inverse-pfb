@@ -10,9 +10,9 @@
 int main(int argc, char *argv[])
 {
     //Check arguments
-    if(argc < 2)
+    if(argc < 3)
     {
-        printf("usage: ipfbrun parameterfilename\n");
+        printf("usage: ipfbrun parameterfilename maxmemory\n");
         return -1;
     }
 
@@ -26,11 +26,13 @@ int main(int argc, char *argv[])
     int memAv, ntaps, fchans, firstchan, nchans, fact2, i, r, k, n, flip, nsections,
         sectionSize, wholeSection, diff;
     long int flength;
+    long int memmax = strtol(argv[2],NULL, 10);
     int16_t *fdata;
     uint8_t *chandata;
     int8_t *odata;
     float *data, *rndata, *indata, *predata;
     float tmpr,tmpi;
+    float memUseFactor = 0.022; // Bytes memory used per bytes input
     float rmin = 0;
     float imin = 0;
     FILE *test, *test2, *info, *ofile;
@@ -144,8 +146,8 @@ int main(int argc, char *argv[])
     }
 
     //check available memory
-    memAv = checkmem();
-    printf("Memory and Swap available: %d kB\n", memAv);
+    // memAv = checkmem();
+    // printf("Memory and Swap available: %d kB\n", memAv);
 
     //check number of sections (based on memory)
     nsections = 1;

@@ -97,8 +97,11 @@ int main(int argc, char *argv[])
 
     float rdata[fact2],idata[fact2];
     float qrm[fact2][ntaps];
-    float rmax[fact2] = {0};
-    float imax[fact2] = {0};
+    float rmax[fact2];
+    float imax[fact2];
+
+    memset(rmax, 0, fact2 * sizeof(float));
+    memset(imax, 0, fact2 * sizeof(float));
 
     for (r=0;r<fact2;r++)
     {

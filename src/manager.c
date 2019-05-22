@@ -335,6 +335,14 @@ int main(int argc, char *argv[])
                 imax[r] = -127/imin;
             }
         }
+
+        FILE *test7 = fopen("testing/ftest7.dat", "w");
+        fwrite(data, 2 * wholeSection * fact2 * sizeof(float), 1, test7);
+        fclose(test5);
+
+        FILE *test8 = fopen("testing/ftest8.dat", "w");
+        fwrite(data, 2 * wholeSection * fact2 * sizeof(float), 1, test8);
+        fclose(test5);
         //}
         rmin = min(rmax, fact2);
         imin = min(imax, fact2);

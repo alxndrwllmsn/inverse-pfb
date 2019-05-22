@@ -72,7 +72,7 @@ void convolve(float data[],int nsamples, float filter[], int flength, float outA
 void fftconvolve(float rdata[], float idata[], int nsamples, float filter[], int flength,
     float outAr[], float ioutAr[], fftw_plan p, fftw_plan q)
 {
-    int ntotal = nsamples + flength - 1;
+    int ntotal = nsamples;
     int hflength = (int)flength/2;
     int hntotal = (int)ntotal/2;
     int i;
@@ -87,13 +87,6 @@ void fftconvolve(float rdata[], float idata[], int nsamples, float filter[], int
         ind[i][0] = rdata[i];
         ind[i][1] = idata[i];
     }
-    for(i=nsamples;i<ntotal;i++)
-    {
-        ind[i][0] = 0;
-        ind[i][1] = 0;
-    }
-
-
 
     fftw_execute_dft(p, ind, outd);
     fftw_free(ind);
@@ -130,15 +123,10 @@ void fftconvolve(float rdata[], float idata[], int nsamples, float filter[], int
     fftw_execute_dft(q, inc, outc);
     fftw_free(inc);
 
-    for(i=hflength;i<hntotal;i++)
+    for(i=0;i<ntotal;i++)
     {
-        outAr[i-hflength] = (float)outc[i + hntotal][0]/ntotal;
-        ioutAr[i-hflength] = (float)outc[i + hntotal][1]/ntotal;
-    }
-    for(i=hntotal;i<hflength + nsamples;i++)
-    {
-        outAr[i - hflength] = (float)outc[i - hntotal][0]/ntotal;
-        ioutAr[i-hflength] = (float)outc[i - hntotal][1]/ntotal;
+        outAr[i] = (float)outc[i][0]/ntotal;
+        ioutAr[i] = (float)outc[i][1]/ntotal;
     }
 
     fftw_free(outc);

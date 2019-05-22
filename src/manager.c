@@ -263,7 +263,7 @@ int main(int argc, char *argv[])
         }
 
         FILE *test5 = fopen("testing/ftest5.dat", "w");
-        fwrite(data, 2 * wholeSection * fact2 * sizeof(float), 1, ftest5);
+        fwrite(data, 2 * wholeSection * fact2 * sizeof(float), 1, test5);
         fclose(test5);
 
 
@@ -278,6 +278,13 @@ int main(int argc, char *argv[])
                     data[(n*2 + 1)*fact2 + r] = predata[(n*2 + 1)*fact2 + r];
                 }
             }
+        }
+
+        if (i==1)
+        {
+            FILE *test6 = fopen("testing/ftest6.dat", "w");
+            fwrite(data, 2 * wholeSection * fact2 * sizeof(float), 1, test6);
+            fclose(test5);
         }
 
             /*perform convolution

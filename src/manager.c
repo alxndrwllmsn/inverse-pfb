@@ -149,7 +149,11 @@ int main(int argc, char *argv[])
     memUse = fact2*pars.nsamples*memUseFactor;
 
     //check number of sections (based on memory)
-    nsections = (int)memmax/memUse;
+    nsections = (int)memUse/memmax;
+    if(~nsections)
+    {
+        nsections = 1;
+    }
     sectionSize = (int)pars.nsamples/nsections;
     wholeSection = sectionSize + ntaps;
 
@@ -201,12 +205,12 @@ int main(int argc, char *argv[])
             read_vcs(dfiles[k], chandata, sectionSize*2);
             for (n=0;n<sectionSize;n++)
             {
-                tmpr = (float)(int)chandata[n];
+                tmpr = (float)(int)chandata[2*n];
                 if(tmpr >= 128)
                 {
                     tmpr -= 256;
                 }
-                tmpi = (float)(int)chandata[n+1];
+                tmpi = (float)(int)chandata[2*n+1];
                 if(tmpi >= 128)
                 {
                     tmpi -= 256;
@@ -225,10 +229,20 @@ int main(int argc, char *argv[])
                     data[(2*(n+ntaps)+1)*fact2+(k+firstchan - ds.low)] = tmpi;
                     data[(2*(n+ntaps)+1)*fact2+(fact2 - (k+firstchan - ds.low))] = tmpi;
                 }
+
+            }
+            if(k==0)
+            {
+                FILE *test3 = fopen("testing/ftest3.dat", "w");
+                fwrite(chandata, 2 * sectionSize * sizeof(uint8_t), 1, test3);
+                fclose(test3);
             }
 
-
         }
+
+        FILE *test4 = fopen("testing/ftest4.dat", "w");
+        fwrite(data, 2 * wholeSection * fact2 * sizeof(float), 1, test4);
+        fclose(test4);
         /*perform ipfb
         {
             perform ifft*/
@@ -247,6 +261,10 @@ int main(int argc, char *argv[])
                 data[((n+ntaps)*2 + 1)*fact2 + r] = idata[r];
             }
         }
+
+        FILE *test5 = fopen("testing/ftest5.dat", "w");
+        fwrite(data, 2 * wholeSection * fact2 * sizeof(float), 1, ftest5);
+        fclose(test5);
 
 
             /*prepend extra data unless it is the first section*/

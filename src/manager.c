@@ -302,13 +302,12 @@ int main(int argc, char *argv[])
                 rndata[n] = data[(n*2)*fact2 + r];
                 indata[n] = data[(n*2 + 1)*fact2 + r];
             }
-            fftconvolve(rndata, indata, pars.nsamples, qrm[r], ntaps, rndata, indata, q, m);
-
             for(n=0;n<ntaps;n++)
             {
                 predata[(n*2)*fact2 + r] = rndata[n];
                 predata[(n*2 + 1)*fact2 + r] = indata[n];
             }
+            fftconvolve(rndata, indata, pars.nsamples, qrm[r], ntaps, rndata, indata, q, m);
             for(n=0;n<sectionSize;n++)
             {
                 data[((n+ntaps)*2)*fact2 + r] = rndata[n+ntaps];

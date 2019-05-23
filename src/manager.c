@@ -54,9 +54,10 @@ int main(int argc, char *argv[])
             "nchannels: %d\n"
             "firstchan: %d\n"
             "ntiles: %d\n"
-            "tile: %d\n",pars.datadir, pars.filterfname, pars.outputfname,
+            "tile: %d\n"
+            "pol: %d\n",pars.datadir, pars.filterfname, pars.outputfname,
             pars.filterlen, pars.filterchans, pars.nsamples, pars.nchannels,
-            pars.firstchan, pars.ntiles, pars.tile);
+            pars.firstchan, pars.ntiles, pars.tile, pars.pol);
 
     //read filter
     flength = pars.filterlen;
@@ -143,6 +144,8 @@ int main(int argc, char *argv[])
             printf("Could not open file %s\n",fnames[i]);
             return 0;
         }
+        fseek(dfiles[i], 4096+102400*2*pars.ntiles, SEEK_SET);
+        fseek(dfiles[i], 102400*(2*pars.tile+pars.pol), SEEK_CUR);
     }
 
     //check available memory
@@ -189,7 +192,7 @@ int main(int argc, char *argv[])
     predata = (float *)malloc(2 * ntaps * fact2 * sizeof *predata);
 
     strcpy(infotextcat,pars.datadir);
-    sprintf(buffer,"%d",pars.tile);
+    sprintf(buffer,"%d_%d",pars.tile, pars.pol);
     strcat(infotextcat,buffer);
     strcat(infotextcat,".dat");
     ofile = fopen(infotextcat,"w");
@@ -259,8 +262,10 @@ int main(int argc, char *argv[])
             {
                 data[((n+ntaps)*2)*fact2 + r] = rdata[r];
                 data[((n+ntaps)*2 + 1)*fact2 + r] = idata[r];
+
             }
         }
+
 
         FILE *test5 = fopen("testing/dataffttest.dat", "w");
         fwrite(data, 2 * wholeSection * fact2 * sizeof(float), 1, test5);
@@ -295,6 +300,7 @@ int main(int argc, char *argv[])
 
                 ifft section
             }*/
+
         for(r=0;r<fact2;r++)
         {
             for(n=0;n<wholeSection;n++)

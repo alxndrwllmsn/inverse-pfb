@@ -13,6 +13,7 @@ struct parameters
     int firstchan;
     int ntiles;
     int tile;
+    int pol;
 };
 
 struct parameters getpars(char *parfname);

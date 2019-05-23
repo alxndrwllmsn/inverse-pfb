@@ -108,6 +108,15 @@ struct parameters getpars(char *parfname) /*returns the values from a parameter
             }
             pars.tile = (int)strtol(buff2, &p, 10);
         }
+        else if(strcmp(buff, "pol") == 0)
+        {
+            if(fscanf(pf, "%s", buff2) == 0)
+            {
+                printf("Error reading %s\n", buff);
+                abort();
+            }
+            pars.pol = (int)strtol(buff2, &p, 10);
+        }
     }
     fclose(pf);
     return pars;

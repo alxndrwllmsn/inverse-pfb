@@ -10,9 +10,9 @@
 int main(int argc, char *argv[])
 {
     //Check arguments
-    if(argc < 3)
+    if(argc < 2)
     {
-        printf("usage: ipfbrun parameterfilename maxmemory(bytes)\n");
+        printf("usage: ipfbrun parameterfilename\n");
         return -1;
     }
 

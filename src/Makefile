@@ -1,6 +1,6 @@
 IDIR = ../include
 CC=cc
-CFLAGS=-I$(IDIR) -O3
+CFLAGS=-I$(IDIR) -O3 -ffast-math -funroll-loops
 
 ODIR=obj
 LDIR=../lib
@@ -21,7 +21,7 @@ $(ODIR)/%.o: %.c $(DEPS)
 
 .PHONY: clean debug
 
-debug: CFLAGS += -g
+debug: CFLAGS = -I$(IDIR) -g -O3
 debug: ../ipfb
 
 clean:

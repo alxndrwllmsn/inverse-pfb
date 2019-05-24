@@ -149,15 +149,15 @@ int main(int argc, char *argv[])
     }
 
     //check available memory
-    memUse = fact2*pars.nsamples*memUseFactor;
+    // memUse = fact2*pars.nsamples*memUseFactor;
 
     //check number of sections (based on memory)
-    nsections = (int)memUse/memmax;
+    nsections = 200;
     if(~nsections)
     {
         nsections = 1;
     }
-    sectionSize = (int)pars.nsamples/nsections;
+    sectionSize = 51200;
     wholeSection = sectionSize + ntaps;
 
     //allocate memory for data
@@ -240,6 +240,7 @@ int main(int argc, char *argv[])
                 fwrite(chandata, 2 * sectionSize * sizeof(uint8_t), 1, test3);
                 fclose(test3);
             }
+            fseek(dfiles[k], 102400*2*pars.ntiles, SEEK_CUR);
 
         }
 

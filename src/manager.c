@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
 
     printf("datadir: %s\n"
             "filterfile: %s\n"
-            "outputfile: %s\n"
+            "outputdir: %s\n"
             "filterlen: %ld\n"
             "filterchans: %d\n"
             "nsamples: %ld\n"
@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
             "firstchan: %d\n"
             "ntiles: %d\n"
             "tile: %d\n"
-            "pol: %d\n",pars.datadir, pars.filterfname, pars.outputfname,
+            "pol: %d\n",pars.datadir, pars.filterfname, pars.outputdir,
             pars.filterlen, pars.filterchans, pars.nsamples, pars.nchannels,
             pars.firstchan, pars.ntiles, pars.tile, pars.pol);
 
@@ -191,10 +191,9 @@ int main(int argc, char *argv[])
     indata = (float *)malloc(wholeSection * sizeof *indata);
     predata = (float *)malloc(2 * ntaps * fact2 * sizeof *predata);
 
-    strcpy(infotextcat,pars.datadir);
-    sprintf(buffer,"%d_%d",pars.tile, pars.pol);
+    strcpy(infotextcat,pars.outputdir);
+    sprintf(buffer,"/out_%d_%d.dat",pars.tile, pars.pol);
     strcat(infotextcat,buffer);
-    strcat(infotextcat,".dat");
     ofile = fopen(infotextcat,"w");
 
     odata = (int8_t *)malloc(sectionSize * fact2 * 2 *sizeof *odata);

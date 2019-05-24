@@ -209,7 +209,7 @@ void checkpars(struct parameters pars)
         printf("filterfile not specified\n");
         a=1;
     }
-    if(strcmp(pars.outputfname,"notoutfile") == 0)
+    if(strcmp(pars.outputdir,"notoutfile") == 0)
     {
         printf("outputfile not specified\n");
         a=1;
@@ -247,6 +247,11 @@ void checkpars(struct parameters pars)
     if(pars.tile == -1)
     {
         printf("tile not specified\n");
+        a=1;
+    }
+    if(pars.pol == -1)
+    {
+        printf("polarisation not specified\n");
         a=1;
     }
     if(a)

@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
     char fname[50], infotextcat[50], buffer[50];
     char *infotext = ".info";
     struct parameters pars = {"notdfile","notffile","notoutfile",-1,-1,-1,-1,-1,
-                                -1,-1};
+                                -1,-1,-1};
     struct dsampled ds;
     int memAv, ntaps, fchans, firstchan, nchans, fact2, i, r, k, n, flip, nsections,
         sectionSize, wholeSection, diff;

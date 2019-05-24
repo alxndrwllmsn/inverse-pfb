@@ -5,7 +5,7 @@ struct parameters
 {
     char datadir[50];
     char filterfname[50];
-    char outputfname[50];
+    char outputdir[50];
     long filterlen;
     int filterchans;
     long nsamples;

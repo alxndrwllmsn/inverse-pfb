@@ -37,9 +37,9 @@ struct parameters getpars(char *parfname) /*returns the values from a parameter
                 abort();
             }
         }
-        else if(strcmp(buff,"outputfile") == 0)
+        else if(strcmp(buff,"outputdir") == 0)
         {
-            if(fscanf(pf, "%s", pars.outputfname)==0)
+            if(fscanf(pf, "%s", pars.outputdir)==0)
             {
                 printf("Error reading %s\n",buff );
                 abort();

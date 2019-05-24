@@ -1,0 +1,11 @@
+datadir		testing/Obs_1241175616
+filterfile	testing/CoarseCoeff.dat
+outputdir	testing/Obs_1241175616_out
+filter_length	4096
+filter_chans	512
+nsamples	10240000
+nchannels	6
+firstchan	80
+ntiles		128
+tile		0
+pol		0

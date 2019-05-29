@@ -14,7 +14,7 @@ struct parameters getpars(char *parfname) /*returns the values from a parameter
     int i;
 
     pf = fopen(parfname, "r");
-    for(i=0;i<10;i++)
+    for(i=0;i<11;i++)
     {
         if(fscanf(pf, "%s", buff)==0)
         {

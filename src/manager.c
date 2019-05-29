@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
 
     //Initialise variables
     char *parfile = argv[1];
-    char fname[50], infotextcat[50], buffer[50];
+    char fname[100], infotextcat[50], buffer[50], errormessage[100];
     char *infotext = ".info";
     struct parameters pars = {"notdfile","notffile","notoutfile",-1,-1,-1,-1,-1,
                                 -1,-1,-1};
@@ -27,7 +27,6 @@ int main(int argc, char *argv[])
         sectionSize, wholeSection, diff;
     int memUseFactor = 22; // Bytes memory used per bytes input
     long int flength;
-    long int memmax = strtol(argv[2],NULL, 10);
     int16_t *fdata;
     uint8_t *chandata;
     int8_t *odata;
@@ -89,7 +88,7 @@ int main(int argc, char *argv[])
     firstchan = pars.firstchan;
     nchans = pars.nchannels;
 
-    char fnames[nchans][50];
+    char fnames[nchans][100];
     FILE *dfiles[nchans];
 
     ds = find_downsampled(fchans,firstchan, nchans);
@@ -126,6 +125,12 @@ int main(int argc, char *argv[])
     strcpy(infotextcat,pars.datadir);
     strcat(infotextcat,infotext);
     info = fopen(infotextcat,"r");
+    if(info == NULL)
+    {
+        sprintf(errormessage,"Opening %s failed: ",infotextcat);
+        perror(errormessage);
+        return 1;
+    }
     for (i=0;i<nchans;i++)
     {
         if(fscanf(info, "%s", fnames[i])==0)
@@ -133,8 +138,11 @@ int main(int argc, char *argv[])
             printf("Error reading parameter names.\n");
             abort();
         }
+        sprintf(fname,"%s/%s",pars.datadir,fnames[i]);
+        strcpy(fnames[i],fname);
         printf("%s\n",fnames[i]);
     }
+    fclose(info);
     //open each data file
     for (i=0;i<nchans;i++)
     {
@@ -146,13 +154,14 @@ int main(int argc, char *argv[])
         }
         fseek(dfiles[i], 4096+102400*2*pars.ntiles, SEEK_SET);
         fseek(dfiles[i], 102400*(2*pars.tile+pars.pol), SEEK_CUR);
+        printf("Moved marker into position\n");
     }
 
     //check available memory
     // memUse = fact2*pars.nsamples*memUseFactor;
 
     //check number of sections (based on memory)
-    nsections = 200;
+    nsections = 1;
     if(~nsections)
     {
         nsections = 1;
@@ -167,7 +176,8 @@ int main(int argc, char *argv[])
     in = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * fact2);
     out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * fact2);
 
-    p = fftw_plan_dft_1d(fact2, in, out, FFTW_BACKWARD, FFTW_EXHAUSTIVE);
+    printf("Planning FFT's\n");
+    p = fftw_plan_dft_1d(fact2, in, out, FFTW_BACKWARD, FFTW_ESTIMATE);
 
     fftw_free(in);
     fftw_free(out);
@@ -176,12 +186,12 @@ int main(int argc, char *argv[])
     out1 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * pars.nsamples);
     diff = 0;
 
-    q = fftw_plan_dft_1d(pars.nsamples,in1,out1,FFTW_FORWARD, FFTW_EXHAUSTIVE);
-    m = fftw_plan_dft_1d(pars.nsamples,in1,out1,FFTW_BACKWARD, FFTW_EXHAUSTIVE);
+    q = fftw_plan_dft_1d(pars.nsamples,in1,out1,FFTW_FORWARD, FFTW_ESTIMATE);
+    m = fftw_plan_dft_1d(pars.nsamples,in1,out1,FFTW_BACKWARD, FFTW_ESTIMATE);
 
     fftw_free(in1);
     fftw_free(out1);
-
+    printf("Saving wisdom\n");
     if(fftw_export_wisdom_to_filename("ipfbwisdom.ws")==0)
     {
         printf("Wisdom was not saved correctly.\n");
@@ -201,9 +211,11 @@ int main(int argc, char *argv[])
     //loop over sections-> for each section
     for(i = 0;i<nsections;i++)
     {
+        printf("Starting section %d\n",i+1);
         //read section from file
         for (k=0;k<nchans;k++)
         {
+            printf("Reading in channel %d\n",k+1);
             read_vcs(dfiles[k], chandata, sectionSize*2);
             for (n=0;n<sectionSize;n++)
             {
@@ -249,6 +261,7 @@ int main(int argc, char *argv[])
         /*perform ipfb
         {
             perform ifft*/
+        printf("Performing iFFT\n");
         for(n=0;n<sectionSize;n++)
         {
             for(k=0;k<fact2;k++)
@@ -289,7 +302,7 @@ int main(int argc, char *argv[])
         {
             FILE *test6 = fopen("testing/dataprependtest.dat", "w");
             fwrite(data, 2 * wholeSection * fact2 * sizeof(float), 1, test6);
-            fclose(test5);
+            fclose(test6);
         }
 
             /*perform convolution
@@ -300,7 +313,7 @@ int main(int argc, char *argv[])
 
                 ifft section
             }*/
-
+        printf("Performing convolution\n");
         for(r=0;r<fact2;r++)
         {
             for(n=0;n<wholeSection;n++)
@@ -343,11 +356,11 @@ int main(int argc, char *argv[])
 
         FILE *test7 = fopen("testing/predatatest.dat", "w");
         fwrite(predata, 2 * ntaps * fact2 * sizeof(float), 1, test7);
-        fclose(test5);
+        fclose(test7);
 
         FILE *test8 = fopen("testing/dataconvtest.dat", "w");
         fwrite(data, 2 * wholeSection * fact2 * sizeof(float), 1, test8);
-        fclose(test5);
+        fclose(test8);
         //}
         rmin = min(rmax, fact2);
         imin = min(imax, fact2);
@@ -365,15 +378,19 @@ int main(int argc, char *argv[])
             }
         }
         //write section to file
+        printf("Writing section %d\n",i+1);
         fwrite(odata, sectionSize * 2 * fact2 *sizeof *odata, 1, ofile);
 
     }
     //clean up
+    printf("Cleaning up\n");
     free(chandata);
     free(rndata);
     free(indata);
     free(fdata);
     free(odata);
+    free(predata);
+    free(data);
 
     fftw_destroy_plan(p);
     fftw_destroy_plan(q);

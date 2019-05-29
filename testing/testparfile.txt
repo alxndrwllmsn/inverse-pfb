@@ -1,6 +1,6 @@
-datadir		testing/testdata_cr	
+datadir		/media/alexander/Elements/Obs_1241175616	
 filterfile	testing/CoarseCoeff.dat
-outputdir	testing/testdata_cr
+outputdir	testing/test_obs
 filter_length	4096
 filter_chans	512
 nsamples	51200

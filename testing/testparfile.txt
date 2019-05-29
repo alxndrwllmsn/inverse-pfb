@@ -1,9 +1,9 @@
-datadir		testing/Obs_1241175616
+datadir		/media/alexander/Elements/Obs_1241175616
 filterfile	testing/CoarseCoeff.dat
-outputdir	testing/Obs_1241175616_out
+outputdir	testing/test_obs
 filter_length	4096
 filter_chans	512
-nsamples	10240000
+nsamples	51200
 nchannels	6
 firstchan	80
 ntiles		128

@@ -368,7 +368,7 @@ struct dsampled find_downsampled(int fchan, int chanloc, int nchans)
     for(i=0;i<(int)fchan/(2*nchans);i++)
     {
         half = (int)(ds.low+ds.high)/2;
-        if(half =< chanloc)
+        if(half <= chanloc)
         {
             ds.low = half;
             ds.factor = ds.factor*2;

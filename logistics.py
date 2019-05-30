@@ -35,7 +35,7 @@ def worker(pars, t, p):
     #create parfile
     genParFile(pars,t,p)
     #run ipfb on parfile
-    out = sp.check_output(['./ipfb', 'tmppar{}_{}.txt'.format(t, p)], stderr=sp.STDOUT)
+    out = sp.check_output(['./inverse-pfb/ipfb', 'tmppar{}_{}.txt'.format(t, p)], stderr=sp.STDOUT)
     print(out.decode('utf-8'))
     #remove parfile
     os.remove('tmppar{}_{}.txt'.format(t, p))

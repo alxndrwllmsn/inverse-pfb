@@ -65,9 +65,9 @@ int main(int argc, char *argv[])
     fdata = (int16_t *)malloc(flength * sizeof *fdata);
     read_filter(fname, fdata, flength);
 
-    test = fopen("testing/fdatatest.dat", "w");
-    fwrite(fdata, flength * sizeof *fdata, 1, test);
-    fclose(test);
+    // test = fopen("testing/fdatatest.dat", "w");
+    // fwrite(fdata, flength * sizeof *fdata, 1, test);
+    // fclose(test);
 
     //import wisdom
     if(exists("ipfbwisdom.ws"))
@@ -113,10 +113,10 @@ int main(int argc, char *argv[])
         }
     }
 
-    test2 = fopen("testing/qrmtest.dat", "w");
-    printf("factor*2:%d, ntaps:%d\n",fact2,ntaps);
-    fwrite(qrm, fact2*ntaps * sizeof(float), 1, test2);
-    fclose(test2);
+    // test2 = fopen("testing/qrmtest.dat", "w");
+    // printf("factor*2:%d, ntaps:%d\n",fact2,ntaps);
+    // fwrite(qrm, fact2*ntaps * sizeof(float), 1, test2);
+    // fclose(test2);
 
     //check flip
     flip = ((int)ds.high/ds.factor+1)%2;
@@ -246,19 +246,19 @@ int main(int argc, char *argv[])
                 }
 
             }
-            if(k==0)
-            {
-                FILE *test3 = fopen("testing/chandatareadtest.dat", "w");
-                fwrite(chandata, 2 * sectionSize * sizeof(uint8_t), 1, test3);
-                fclose(test3);
-            }
+            // if(k==0)
+            // {
+            //     FILE *test3 = fopen("testing/chandatareadtest.dat", "w");
+            //     fwrite(chandata, 2 * sectionSize * sizeof(uint8_t), 1, test3);
+            //     fclose(test3);
+            // }
             fseek(dfiles[k], 102400*2*pars.ntiles, SEEK_CUR);
 
         }
 
-        FILE *test4 = fopen("testing/datareadtest.dat", "w");
-        fwrite(data, 2 * wholeSection * fact2 * sizeof(float), 1, test4);
-        fclose(test4);
+        // FILE *test4 = fopen("testing/datareadtest.dat", "w");
+        // fwrite(data, 2 * wholeSection * fact2 * sizeof(float), 1, test4);
+        // fclose(test4);
         /*perform ipfb
         {
             perform ifft*/
@@ -281,9 +281,9 @@ int main(int argc, char *argv[])
         }
 
 
-        FILE *test5 = fopen("testing/dataffttest.dat", "w");
-        fwrite(data, 2 * wholeSection * fact2 * sizeof(float), 1, test5);
-        fclose(test5);
+        // FILE *test5 = fopen("testing/dataffttest.dat", "w");
+        // fwrite(data, 2 * wholeSection * fact2 * sizeof(float), 1, test5);
+        // fclose(test5);
 
 
             /*prepend extra data unless it is the first section*/
@@ -299,12 +299,12 @@ int main(int argc, char *argv[])
             }
         }
 
-        if (i==1)
-        {
-            FILE *test6 = fopen("testing/dataprependtest.dat", "w");
-            fwrite(data, 2 * wholeSection * fact2 * sizeof(float), 1, test6);
-            fclose(test6);
-        }
+        // if (i==1)
+        // {
+        //     FILE *test6 = fopen("testing/dataprependtest.dat", "w");
+        //     fwrite(data, 2 * wholeSection * fact2 * sizeof(float), 1, test6);
+        //     fclose(test6);
+        // }
 
             /*perform convolution
             {
@@ -355,13 +355,13 @@ int main(int argc, char *argv[])
             }
         }
 
-        FILE *test7 = fopen("testing/predatatest.dat", "w");
-        fwrite(predata, 2 * ntaps * fact2 * sizeof(float), 1, test7);
-        fclose(test7);
-
-        FILE *test8 = fopen("testing/dataconvtest.dat", "w");
-        fwrite(data, 2 * wholeSection * fact2 * sizeof(float), 1, test8);
-        fclose(test8);
+        // FILE *test7 = fopen("testing/predatatest.dat", "w");
+        // fwrite(predata, 2 * ntaps * fact2 * sizeof(float), 1, test7);
+        // fclose(test7);
+        //
+        // FILE *test8 = fopen("testing/dataconvtest.dat", "w");
+        // fwrite(data, 2 * wholeSection * fact2 * sizeof(float), 1, test8);
+        // fclose(test8);
         //}
         rmin = min(rmax, fact2);
         imin = min(imax, fact2);

@@ -9,48 +9,58 @@ struct parameters getpars(char *parfname) /*returns the values from a parameter
 {
     //Variable Initialisation
     struct parameters pars;
+    char errm[50];
     FILE *pf;
     char buff[50], buff2[50], *p;
     int i;
 
     pf = fopen(parfname, "r");
+    if(pf==NULL)
+    {
+        perror("Error opening file");
+        exit(-1);
+    }
     for(i=0;i<11;i++)
     {
         if(fscanf(pf, "%s", buff)==0)
         {
-            printf("Error reading parameter names.\n");
-            abort();
+            perror("Error reading parameter names.");
+            exit(-1);
         }
         if(strcmp(buff,"datadir") == 0)
         {
             if(fscanf(pf, "%s", pars.datadir)==0)
             {
-                printf("Error reading %s\n",buff );
-                abort();
+                sprintf(errm,"Error reading %s\n",buff);
+                perror(errm);
+                exit(-1);
             }
         }
         else if(strcmp(buff,"filterfile") == 0)
         {
             if(fscanf(pf, "%s", pars.filterfname)==0)
             {
-                printf("Error reading %s\n",buff );
-                abort();
+                sprintf(errm,"Error reading %s\n",buff);
+                perror(errm);
+                exit(-1);
             }
         }
         else if(strcmp(buff,"outputdir") == 0)
         {
             if(fscanf(pf, "%s", pars.outputdir)==0)
             {
-                printf("Error reading %s\n",buff );
-                abort();
+                sprintf(errm,"Error reading %s\n",buff);
+                perror(errm);
+                exit(-1);
             }
         }
         else if(strcmp(buff,"filter_length") == 0)
         {
             if(fscanf(pf, "%s", buff2)==0)
             {
-                printf("Error reading %s\n",buff );
-                abort();
+                sprintf(errm,"Error reading %s\n",buff);
+                perror(errm);
+                exit(-1);
             }
             pars.filterlen = strtol(buff2,&p,10);
         }
@@ -58,8 +68,9 @@ struct parameters getpars(char *parfname) /*returns the values from a parameter
         {
             if(fscanf(pf, "%s", buff2)==0)
             {
-                printf("Error reading %s\n",buff );
-                abort();
+                sprintf(errm,"Error reading %s\n",buff);
+                perror(errm);
+                exit(-1);
             }
             pars.filterchans = (int)strtol(buff2, &p, 10);
         }
@@ -67,8 +78,9 @@ struct parameters getpars(char *parfname) /*returns the values from a parameter
         {
             if(fscanf(pf, "%s", buff2)==0)
             {
-                printf("Error reading %s\n",buff );
-                abort();
+                sprintf(errm,"Error reading %s\n",buff);
+                perror(errm);
+                exit(-1);
             }
             pars.nsamples = strtol(buff2,&p,10);
         }
@@ -76,8 +88,9 @@ struct parameters getpars(char *parfname) /*returns the values from a parameter
         {
             if(fscanf(pf, "%s", buff2)==0)
             {
-                printf("Error reading %s\n",buff );
-                abort();
+                sprintf(errm,"Error reading %s\n",buff);
+                perror(errm);
+                exit(-1);
             }
             pars.nchannels = (int)strtol(buff2,&p,10);
         }
@@ -85,8 +98,9 @@ struct parameters getpars(char *parfname) /*returns the values from a parameter
         {
             if(fscanf(pf, "%s", buff2)==0)
             {
-                printf("Error reading %s\n",buff );
-                abort();
+                sprintf(errm,"Error reading %s\n",buff);
+                perror(errm);
+                exit(-1);
             }
             pars.firstchan = (int)strtol(buff2,&p,10);
         }
@@ -94,8 +108,9 @@ struct parameters getpars(char *parfname) /*returns the values from a parameter
         {
             if(fscanf(pf, "%s", buff2)==0)
             {
-                printf("Error reading %s\n",buff );
-                abort();
+                sprintf(errm,"Error reading %s\n",buff);
+                perror(errm);
+                exit(-1);
             }
             pars.ntiles = (int)strtol(buff2,&p,10);
         }
@@ -103,8 +118,9 @@ struct parameters getpars(char *parfname) /*returns the values from a parameter
         {
             if(fscanf(pf, "%s", buff2) == 0)
             {
-                printf("Error reading %s\n",buff );
-                abort();
+                sprintf(errm,"Error reading %s\n",buff);
+                perror(errm);
+                exit(-1);
             }
             pars.tile = (int)strtol(buff2, &p, 10);
         }
@@ -112,8 +128,9 @@ struct parameters getpars(char *parfname) /*returns the values from a parameter
         {
             if(fscanf(pf, "%s", buff2) == 0)
             {
-                printf("Error reading %s\n", buff);
-                abort();
+                sprintf(errm,"Error reading %s\n",buff);
+                perror(errm);
+                exit(-1);
             }
             pars.pol = (int)strtol(buff2, &p, 10);
         }
@@ -133,8 +150,8 @@ void read_vcs(FILE *file, uint8_t data[],int data_length) /*reads the data from
     buffer = (uint8_t *)malloc(data_length * sizeof(uint8_t));
     if(fread(buffer, data_length * sizeof(uint8_t), 1, file)==0)
     {
-        printf("Error reading data file\n");
-        abort();
+        perror("Error reading data file\n");
+        exit(-1);
     }
 
     for(i=0;i<data_length;i++){
@@ -150,12 +167,14 @@ void read_filter(char *filename, int16_t fdata[],unsigned long filter_length)
     //open file and initialise variables
     FILE *fp = fopen(filename,"r");
     float buffer[filter_length];
+    char errm[50];
     int i;
 
     if(fp == NULL)
     {
-        printf("The filter file was not found at %s\n",filename );
-        abort();
+        sprintf(errm,"The filter file was not found at %s\n",filename);
+        perror(errm);
+        exit(-1);
     }
 
     //read file and save to fdata
@@ -256,8 +275,8 @@ void checkpars(struct parameters pars)
     }
     if(a)
     {
-        printf("Please specify each parameter and try again\n");
-        abort();
+        perror("Please specify each parameter and try again\n");
+        exit(-1);
     }
     else
     {
@@ -279,14 +298,14 @@ int checkmem(void)
         if(fscanf(memfile, "%s", buffer)==0)
         {
             printf("Error reading memfile.\n");
-            abort();
+            exit(-1);
         }
         if(strcmp(buffer,"MemAvailable:") == 0)
         {
             if(fscanf(memfile, "%s", buffer)==0)
             {
                 printf("Error reading memory value\n");
-                abort();
+                exit(-1);
             }
             memAv = (int)strtol(buffer, NULL, 10);
         }
@@ -295,7 +314,7 @@ int checkmem(void)
             if(fscanf(memfile, "%s", buffer)==0)
             {
                 printf("Error reading swap value\n");
-                abort();
+                exit(-1);
             }
             swFree = (int)strtol(buffer, NULL, 10);
         }

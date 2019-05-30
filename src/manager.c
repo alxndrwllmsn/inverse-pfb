@@ -161,7 +161,7 @@ int main(int argc, char *argv[])
     // memUse = fact2*pars.nsamples*memUseFactor;
 
     //check number of sections (based on memory)
-    nsections = 1;
+    nsections = 200;
     if(~nsections)
     {
         nsections = 1;

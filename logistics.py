@@ -52,17 +52,8 @@ def readpars(parfile):
     return pardict
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument("parfile", help="The parameter file from which to read.")
-    parser.add_argument("-t", "--tiles", help="The range of tiles to process (as present within the input file,"
-                                              " eg. '-t 0,12')",default=None)
-    args = parser.parse_args()
-    if args.tiles == None:
-        raise ValueError("Please specify a range of tiles (eg. 0,12). Note that there are 24 cores on a magnus node, "
-                         "therefore this range should have a multiple of 12 tiles (each tile has 2 polarisations)")
-    else:
-        trange = np.array(args.tiles.split(','), dtype=np.int)
+def runMultiProcess(args,trange):
+    import multiprocessing as mp
 
     # read parameters from parfile
     pars = readpars(args.parfile)
@@ -73,3 +64,40 @@ if __name__ == '__main__':
             proc = mp.Process(target=worker, args=(pars, t, p, ))
             jobs.append(proc)
             proc.start()
+
+
+def run_MPI(args,trange):
+    from mpi4py import MPI
+    pars = readpars(args.parfile)
+    comm = MPI.COMM_WORLD
+    rank = comm.Get_rank()
+    nprocs = comm.Get_size()
+    nstreams = 2*(trange[1] - trange[0])
+    if nstreams != nprocs:
+        raise ValueError("Please set the number of processors to be equal to the number of voltage streams"
+                         " (i.e. 2 times the number of tiles).")
+    else:
+        for t in range(trange[0],trange[1]):
+            for p in range(2):
+                if rank == (t*2 + p):
+                    worker(pars, t, p)
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("parfile", help="The parameter file from which to read.")
+    parser.add_argument("-t", "--tiles", help="The range of tiles to process (as present within the input file,"
+                                              " eg. '-t 0,12')",default=None)
+    parser.add_argument("-m","--mpi",help="Use mpi rather than multiprocess",action="store_true")
+    args = parser.parse_args()
+    if args.tiles == None:
+        raise ValueError("Please specify a range of tiles (eg. 0,12). Note that there are 24 cores on a magnus node, "
+                         "therefore this range should have a multiple of 12 tiles (each tile has 2 polarisations)")
+    else:
+        trange = np.array(args.tiles.split(','), dtype=np.int)
+
+    if args.mpi:
+        print("Running with MPI")
+        run_MPI(args,trange)
+    else:
+        print("Running with Multiprocess")
+        runMultiProcess(args,trange)

@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
         {
             sprintf(errormessage,"Could not open file %s\n",fnames[i]);
             perror(errormessage);
-            exit(2);
+            exit(23);
         }
         fseek(dfiles[i], 4096+102400*2*pars.ntiles, SEEK_SET);
         fseek(dfiles[i], 102400*(2*pars.tile+pars.pol), SEEK_CUR);

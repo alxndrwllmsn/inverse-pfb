@@ -35,7 +35,8 @@ def worker(pars, t, p):
     #create parfile
     genParFile(pars,t,p)
     #run ipfb on parfile
-    sp.call(['./ipfb', 'tmppar{}_{}.txt'.format(t, p)])
+    out = sp.check_output(['./ipfb', 'tmppar{}_{}.txt'.format(t, p)], stderr=sp.STDOUT)
+    print(out.decode('utf-8'))
     #remove parfile
     os.remove('tmppar{}_{}.txt'.format(t, p))
 
@@ -76,7 +77,7 @@ def run_MPI(args,trange):
         raise ValueError("Please set the number of processors to be equal to the number of voltage streams"
                          " (i.e. 2 times the number of tiles).")
     else:
-        t, p = np.mgrid[trange[0]:trange[1]:1,0:2:1]
+        t, p = np.mgrid[trange[0]:trange[1]:1, 0:2:1]
         t = t.reshape(nstreams)
         p = p.reshape(nstreams)
         worker(pars, t[rank], p[rank])

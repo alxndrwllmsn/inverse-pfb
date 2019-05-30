@@ -217,7 +217,7 @@ int main(int argc, char *argv[])
         for (k=0;k<nchans;k++)
         {
             printf("Reading in channel %d\n",k+1);
-            read_vcs(dfiles[k], chandata, sectionSize*2);
+            read_vcs(dfiles[k], chandata, sectionSize);
             for (n=0;n<sectionSize;n++)
             {
                 tmpr = (float)(int)chandata[2*n];

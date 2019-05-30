@@ -18,14 +18,14 @@ struct parameters getpars(char *parfname) /*returns the values from a parameter
     if(pf==NULL)
     {
         perror("Error opening file");
-        exit(-1);
+        exit(2);
     }
     for(i=0;i<11;i++)
     {
         if(fscanf(pf, "%s", buff)==0)
         {
             perror("Error reading parameter names.");
-            exit(-1);
+            exit(3);
         }
         if(strcmp(buff,"datadir") == 0)
         {
@@ -33,7 +33,7 @@ struct parameters getpars(char *parfname) /*returns the values from a parameter
             {
                 sprintf(errm,"Error reading %s\n",buff);
                 perror(errm);
-                exit(-1);
+                exit(3);
             }
         }
         else if(strcmp(buff,"filterfile") == 0)
@@ -42,7 +42,7 @@ struct parameters getpars(char *parfname) /*returns the values from a parameter
             {
                 sprintf(errm,"Error reading %s\n",buff);
                 perror(errm);
-                exit(-1);
+                exit(3);
             }
         }
         else if(strcmp(buff,"outputdir") == 0)
@@ -51,7 +51,7 @@ struct parameters getpars(char *parfname) /*returns the values from a parameter
             {
                 sprintf(errm,"Error reading %s\n",buff);
                 perror(errm);
-                exit(-1);
+                exit(3);
             }
         }
         else if(strcmp(buff,"filter_length") == 0)
@@ -60,7 +60,7 @@ struct parameters getpars(char *parfname) /*returns the values from a parameter
             {
                 sprintf(errm,"Error reading %s\n",buff);
                 perror(errm);
-                exit(-1);
+                exit(3);
             }
             pars.filterlen = strtol(buff2,&p,10);
         }
@@ -70,7 +70,7 @@ struct parameters getpars(char *parfname) /*returns the values from a parameter
             {
                 sprintf(errm,"Error reading %s\n",buff);
                 perror(errm);
-                exit(-1);
+                exit(3);
             }
             pars.filterchans = (int)strtol(buff2, &p, 10);
         }
@@ -80,7 +80,7 @@ struct parameters getpars(char *parfname) /*returns the values from a parameter
             {
                 sprintf(errm,"Error reading %s\n",buff);
                 perror(errm);
-                exit(-1);
+                exit(3);
             }
             pars.nsamples = strtol(buff2,&p,10);
         }
@@ -90,7 +90,7 @@ struct parameters getpars(char *parfname) /*returns the values from a parameter
             {
                 sprintf(errm,"Error reading %s\n",buff);
                 perror(errm);
-                exit(-1);
+                exit(3);
             }
             pars.nchannels = (int)strtol(buff2,&p,10);
         }
@@ -100,7 +100,7 @@ struct parameters getpars(char *parfname) /*returns the values from a parameter
             {
                 sprintf(errm,"Error reading %s\n",buff);
                 perror(errm);
-                exit(-1);
+                exit(3);
             }
             pars.firstchan = (int)strtol(buff2,&p,10);
         }
@@ -110,7 +110,7 @@ struct parameters getpars(char *parfname) /*returns the values from a parameter
             {
                 sprintf(errm,"Error reading %s\n",buff);
                 perror(errm);
-                exit(-1);
+                exit(3);
             }
             pars.ntiles = (int)strtol(buff2,&p,10);
         }
@@ -120,7 +120,7 @@ struct parameters getpars(char *parfname) /*returns the values from a parameter
             {
                 sprintf(errm,"Error reading %s\n",buff);
                 perror(errm);
-                exit(-1);
+                exit(3);
             }
             pars.tile = (int)strtol(buff2, &p, 10);
         }
@@ -130,7 +130,7 @@ struct parameters getpars(char *parfname) /*returns the values from a parameter
             {
                 sprintf(errm,"Error reading %s\n",buff);
                 perror(errm);
-                exit(-1);
+                exit(3);
             }
             pars.pol = (int)strtol(buff2, &p, 10);
         }
@@ -151,7 +151,7 @@ void read_vcs(FILE *file, uint8_t data[],int data_length) /*reads the data from
     if(fread(buffer, data_length * sizeof(uint8_t), 1, file)==0)
     {
         perror("Error reading data file\n");
-        exit(-1);
+        exit(2);
     }
 
     for(i=0;i<data_length;i++){
@@ -174,7 +174,7 @@ void read_filter(char *filename, int16_t fdata[],unsigned long filter_length)
     {
         sprintf(errm,"The filter file was not found at %s\n",filename);
         perror(errm);
-        exit(-1);
+        exit(2);
     }
 
     //read file and save to fdata
@@ -276,7 +276,7 @@ void checkpars(struct parameters pars)
     if(a)
     {
         perror("Please specify each parameter and try again\n");
-        exit(-1);
+        exit(4);
     }
     else
     {

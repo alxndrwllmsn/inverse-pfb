@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
     if(argc < 2)
     {
         printf("usage: ipfbrun parameterfilename\n");
-        return -1;
+        return 1;
     }
 
     //Initialise variables
@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
         if(fscanf(info, "%s", fnames[i])==0)
         {
             perror("Error reading parameter names.\n");
-            exit(-1);
+            exit(3);
         }
         sprintf(fname,"%s/%s",pars.datadir,fnames[i]);
         strcpy(fnames[i],fname);
@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
         {
             sprintf(errormessage,"Could not open file %s\n",fnames[i]);
             perror(errormessage);
-            exit(-1);
+            exit(2);
         }
         fseek(dfiles[i], 4096+102400*2*pars.ntiles, SEEK_SET);
         fseek(dfiles[i], 102400*(2*pars.tile+pars.pol), SEEK_CUR);

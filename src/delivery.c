@@ -18,7 +18,7 @@ struct parameters getpars(char *parfname) /*returns the values from a parameter
     if(pf==NULL)
     {
         perror("Error opening file");
-        exit(2);
+        exit(21);
     }
     for(i=0;i<11;i++)
     {

@@ -1,4 +1,3 @@
-import multiprocessing as mp
 import numpy as np
 import os
 import subprocess as sp

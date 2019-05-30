@@ -77,10 +77,10 @@ def run_MPI(args,trange):
         raise ValueError("Please set the number of processors to be equal to the number of voltage streams"
                          " (i.e. 2 times the number of tiles).")
     else:
-        for t in range(trange[0],trange[1]):
-            for p in range(2):
-                if rank == (t*2 + p):
-                    worker(pars, t, p)
+        t, p = np.mgrid[trange[0]:trange[1]:1,0:2:1]
+        t = t.reshape(nstreams)
+        p = p.reshape(nstreams)
+        worker(pars, t[rank], p[rank])
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

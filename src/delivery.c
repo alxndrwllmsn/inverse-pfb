@@ -145,10 +145,13 @@ void read_vcs(FILE *file, uint8_t data[],int data_length) /*reads the data from
     //open file and variable Initialisation
     uint8_t *buffer;
     int i;
+    long int ft;
+
 
     //Read file into buffer as uint8_t
     buffer = (uint8_t *)malloc(data_length * sizeof(uint8_t));
-    if(fread(buffer, data_length * sizeof(uint8_t), 1, file)==0)
+    ft = ftell(file);
+    if(fread(buffer, data_length * sizeof(uint8_t), 1, file)!= 1)
     {
         perror("Error reading data file\n");
         exit(22);

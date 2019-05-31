@@ -162,11 +162,7 @@ int main(int argc, char *argv[])
     // memUse = fact2*pars.nsamples*memUseFactor;
 
     //check number of sections (based on memory)
-    nsections = 200;
-    if(~nsections)
-    {
-        nsections = 1;
-    }
+    nsections = 1;
     sectionSize = 51200;
     wholeSection = sectionSize + ntaps;
 
@@ -209,6 +205,7 @@ int main(int argc, char *argv[])
 
     odata = (int8_t *)malloc(sectionSize * fact2 * 2 *sizeof *odata);
 
+
     //loop over sections-> for each section
     for(i = 0;i<nsections;i++)
     {
@@ -217,7 +214,8 @@ int main(int argc, char *argv[])
         for (k=0;k<nchans;k++)
         {
             printf("Reading in channel %d\n",k+1);
-            read_vcs(dfiles[k], chandata, sectionSize);
+
+            read_vcs(dfiles[k], chandata, sectionSize*2);
             for (n=0;n<sectionSize;n++)
             {
                 tmpr = (float)(int)chandata[2*n];
@@ -248,7 +246,7 @@ int main(int argc, char *argv[])
             }
             // if(k==0)
             // {
-            //     FILE *test3 = fopen("testing/chandatareadtest.dat", "w");
+            //     FILE *test3 = fopen("chandatareadtest.dat", "w");
             //     fwrite(chandata, 2 * sectionSize * sizeof(uint8_t), 1, test3);
             //     fclose(test3);
             // }

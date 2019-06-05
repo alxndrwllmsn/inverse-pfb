@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
     // memUse = fact2*pars.nsamples*memUseFactor;
 
     //check number of sections (based on memory)
-    nsections = 1;
+    nsections = 200;
     sectionSize = 51200;
     wholeSection = sectionSize + ntaps;
 
@@ -250,7 +250,7 @@ int main(int argc, char *argv[])
             //     fwrite(chandata, 2 * sectionSize * sizeof(uint8_t), 1, test3);
             //     fclose(test3);
             // }
-            fseek(dfiles[k], 102400*2*pars.ntiles, SEEK_CUR);
+            fseek(dfiles[k], 102400*(2*pars.ntiles-1), SEEK_CUR);
 
         }
 

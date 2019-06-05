@@ -179,12 +179,12 @@ int main(int argc, char *argv[])
     fftw_free(in);
     fftw_free(out);
 
-    in1 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * pars.nsamples);
-    out1 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * pars.nsamples);
+    in1 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * wholeSection);
+    out1 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * wholeSection);
     diff = 0;
 
-    q = fftw_plan_dft_1d(pars.nsamples,in1,out1,FFTW_FORWARD, FFTW_ESTIMATE);
-    m = fftw_plan_dft_1d(pars.nsamples,in1,out1,FFTW_BACKWARD, FFTW_ESTIMATE);
+    q = fftw_plan_dft_1d(wholeSection,in1,out1,FFTW_FORWARD, FFTW_ESTIMATE);
+    m = fftw_plan_dft_1d(wholeSection,in1,out1,FFTW_BACKWARD, FFTW_ESTIMATE);
 
     fftw_free(in1);
     fftw_free(out1);
@@ -325,7 +325,7 @@ int main(int argc, char *argv[])
                 predata[(n*2)*fact2 + r] = rndata[n];
                 predata[(n*2 + 1)*fact2 + r] = indata[n];
             }
-            fftconvolve(rndata, indata, pars.nsamples, qrm[r], ntaps, rndata, indata, q, m);
+            fftconvolve(rndata, indata, wholeSection, qrm[r], ntaps, rndata, indata, q, m);
             for(n=0;n<sectionSize;n++)
             {
                 data[((n+ntaps)*2)*fact2 + r] = rndata[n+ntaps];

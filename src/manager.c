@@ -263,9 +263,13 @@ int main(int argc, char *argv[])
 
         }
 
-        // FILE *test4 = fopen("testing/datareadtest.dat", "w");
-        // fwrite(data, 2 * wholeSection * fact2 * sizeof(float), 1, test4);
-        // fclose(test4);
+        if (i == 1)
+        {
+            FILE *test4 = fopen("datareadtest.dat", "w");
+            printf("2 %d %d %ld\n",wholeSection,fact2, sizeof *data);
+            fwrite(data, 2 * wholeSection * fact2 * sizeof * data, 1, test4);
+            fclose(test4);
+        }
         /*perform ipfb
         {
             perform ifft*/
@@ -385,6 +389,7 @@ int main(int argc, char *argv[])
                 odata[(n*fact2 + r)*2 + 1] = (int8_t)round(data[((n+ntaps)*2 + 1)*fact2 + r]*imin);
             }
         }
+        memset(data,0,2 * wholeSection * fact2 * sizeof *data);
         //write section to file
         printf("Writing section %d\n",i+1);
         fwrite(odata, sectionSize * 2 * fact2 *sizeof *odata, 1, ofile);

@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
 
     //Initialise variables
     char *parfile = argv[1];
-    char fname[100], infotextcat[50], buffer[50], errormessage[100];
+    char fname[100], infotextcat[50], buffer[100], errormessage[100];
     char *infotext = ".info";
     struct parameters pars = {"notdfile","notffile","notoutfile",-1,-1,-1,-1,-1,
                                 -1,-1,-1};
@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
     float tmpr,tmpi,memUse;
     float rmin = 0;
     float imin = 0;
-    FILE *test, *test2, *info, *ofile;
+    FILE *test, *test2, *info, *ofile, *norms;
     fftw_complex *in, *out, *in1,*out1;
     fftw_plan p, q, m;
 
@@ -202,8 +202,11 @@ int main(int argc, char *argv[])
     sprintf(buffer,"/out_%d_%d.dat",pars.tile, pars.pol);
     strcat(infotextcat,buffer);
     ofile = fopen(infotextcat,"w");
+    sprintf(buffer,"%s/norms_%d_%d.txt",pars.outputdir,pars.tile,pars.pol);
+    norms = fopen(buffer,"w");
 
     odata = (int8_t *)malloc(sectionSize * fact2 * 2 *sizeof *odata);
+
 
     //loop over sections-> for each section
     for(i = 0;i<nsections;i++)
@@ -213,7 +216,6 @@ int main(int argc, char *argv[])
         for (k=0;k<nchans;k++)
         {
             printf("Reading in channel %d\n",k+1);
-            // printf("%ld\n",ftell(dfiles[k]));
 
             read_vcs(dfiles[k], chandata, sectionSize*2);
             for (n=0;n<sectionSize;n++)
@@ -246,30 +248,17 @@ int main(int argc, char *argv[])
             }
             // if(k==0)
             // {
-            //     if (i==0)
-            //     {
-            //         FILE *test3 = fopen("chandatareadtest.dat", "w");
-            //         fwrite(chandata, 2 * sectionSize * sizeof(uint8_t), 1, test3);
-            //         fclose(test3);
-            //     }
-            //     else if(i == 1)
-            //     {
-            //         FILE *test4 = fopen("chandatareadtest2.dat", "w");
-            //         fwrite(chandata, 2 * sectionSize * sizeof(uint8_t), 1, test4);
-            //         fclose(test4);
-            //     }
+            //     FILE *test3 = fopen("chandatareadtest.dat", "w");
+            //     fwrite(chandata, 2 * sectionSize * sizeof(uint8_t), 1, test3);
+            //     fclose(test3);
             // }
             fseek(dfiles[k], 102400*(2*pars.ntiles-1), SEEK_CUR);
 
         }
 
-        if (i == 1)
-        {
-            FILE *test4 = fopen("datareadtest.dat", "w");
-            printf("2 %d %d %ld\n",wholeSection,fact2, sizeof *data);
-            fwrite(data, 2 * wholeSection * fact2 * sizeof * data, 1, test4);
-            fclose(test4);
-        }
+        // FILE *test4 = fopen("testing/datareadtest.dat", "w");
+        // fwrite(data, 2 * wholeSection * fact2 * sizeof(float), 1, test4);
+        // fclose(test4);
         /*perform ipfb
         {
             perform ifft*/
@@ -390,6 +379,8 @@ int main(int argc, char *argv[])
             }
         }
         memset(data,0,2 * wholeSection * fact2 * sizeof *data);
+        //write normalisation factor to file
+        fprintf(norms, "%f\n",imin);
         //write section to file
         printf("Writing section %d\n",i+1);
         fwrite(odata, sectionSize * 2 * fact2 *sizeof *odata, 1, ofile);
@@ -415,5 +406,6 @@ int main(int argc, char *argv[])
         fclose(dfiles[i]);
     }
     fclose(ofile);
+    fclose(norms);
 
 }

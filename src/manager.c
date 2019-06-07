@@ -196,7 +196,7 @@ int main(int argc, char *argv[])
 
     rndata = (float *)malloc(wholeSection * sizeof *rndata);
     indata = (float *)malloc(wholeSection * sizeof *indata);
-    predata = (float *)malloc(2 * ntaps * fact2 * sizeof *predata);
+    predata = calloc(2 * ntaps * fact2, sizeof *predata);
 
     strcpy(infotextcat,pars.outputdir);
     sprintf(buffer,"/out_%d_%d.dat",pars.tile, pars.pol);
@@ -204,7 +204,6 @@ int main(int argc, char *argv[])
     ofile = fopen(infotextcat,"w");
 
     odata = (int8_t *)malloc(sectionSize * fact2 * 2 *sizeof *odata);
-
 
     //loop over sections-> for each section
     for(i = 0;i<nsections;i++)
@@ -214,6 +213,7 @@ int main(int argc, char *argv[])
         for (k=0;k<nchans;k++)
         {
             printf("Reading in channel %d\n",k+1);
+            // printf("%ld\n",ftell(dfiles[k]));
 
             read_vcs(dfiles[k], chandata, sectionSize*2);
             for (n=0;n<sectionSize;n++)
@@ -246,9 +246,18 @@ int main(int argc, char *argv[])
             }
             // if(k==0)
             // {
-            //     FILE *test3 = fopen("chandatareadtest.dat", "w");
-            //     fwrite(chandata, 2 * sectionSize * sizeof(uint8_t), 1, test3);
-            //     fclose(test3);
+            //     if (i==0)
+            //     {
+            //         FILE *test3 = fopen("chandatareadtest.dat", "w");
+            //         fwrite(chandata, 2 * sectionSize * sizeof(uint8_t), 1, test3);
+            //         fclose(test3);
+            //     }
+            //     else if(i == 1)
+            //     {
+            //         FILE *test4 = fopen("chandatareadtest2.dat", "w");
+            //         fwrite(chandata, 2 * sectionSize * sizeof(uint8_t), 1, test4);
+            //         fclose(test4);
+            //     }
             // }
             fseek(dfiles[k], 102400*(2*pars.ntiles-1), SEEK_CUR);
 

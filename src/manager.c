@@ -174,7 +174,7 @@ int main(int argc, char *argv[])
     out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * fact2);
 
     printf("Planning FFT's\n");
-    p = fftw_plan_dft_1d(fact2, in, out, FFTW_BACKWARD, FFTW_ESTIMATE);
+    p = fftw_plan_dft_1d(fact2, in, out, FFTW_BACKWARD, FFTW_EXHAUSTIVE);
 
     fftw_free(in);
     fftw_free(out);
@@ -183,8 +183,8 @@ int main(int argc, char *argv[])
     out1 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * wholeSection);
     diff = 0;
 
-    q = fftw_plan_dft_1d(wholeSection,in1,out1,FFTW_FORWARD, FFTW_ESTIMATE);
-    m = fftw_plan_dft_1d(wholeSection,in1,out1,FFTW_BACKWARD, FFTW_ESTIMATE);
+    q = fftw_plan_dft_1d(wholeSection,in1,out1,FFTW_FORWARD, FFTW_EXHAUSTIVE);
+    m = fftw_plan_dft_1d(wholeSection,in1,out1,FFTW_BACKWARD, FFTW_EXHAUSTIVE);
 
     fftw_free(in1);
     fftw_free(out1);

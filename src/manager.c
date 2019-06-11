@@ -23,18 +23,17 @@ int main(int argc, char *argv[])
     struct parameters pars = {"notdfile","notffile","notoutfile",-1,-1,-1,-1,-1,
                                 -1,-1,-1};
     struct dsampled ds;
-    int memAv, ntaps, fchans, firstchan, nchans, fact2, i, r, k, n, flip, nsections,
-        sectionSize, wholeSection, diff;
-    int memUseFactor = 22; // Bytes memory used per bytes input
+    int ntaps, fchans, firstchan, nchans, fact2, i, r, k, n, flip, nsections,
+        sectionSize, wholeSection;
     long int flength;
     int16_t *fdata;
     uint8_t *chandata;
     int8_t *odata;
     float *data, *rndata, *indata, *predata;
-    float tmpr,tmpi,memUse;
-    float rmin = 0;
+    float tmpr,tmpi;
     float imin = 0;
-    FILE *test, *test2, *info, *ofile, *norms;
+    // FILE *test, *test2;
+    FILE *info, *ofile, *norms;
     fftw_complex *in, *out, *in1,*out1;
     fftw_plan p, q, m;
 
@@ -92,7 +91,7 @@ int main(int argc, char *argv[])
     FILE *dfiles[nchans];
 
     ds = find_downsampled(fchans,firstchan, nchans);
-
+    printf("%d %d %d\n",ds.factor, ds.low, ds.high );
     //polyphase pad and fft filter
     ntaps = (int)flength/fchans;
     fact2 = ds.factor*2;
@@ -158,11 +157,8 @@ int main(int argc, char *argv[])
         printf("Moved marker into position\n");
     }
 
-    //check available memory
-    // memUse = fact2*pars.nsamples*memUseFactor;
-
     //check number of sections (based on memory)
-    nsections = 200;
+    nsections = 5;
     sectionSize = 51200;
     wholeSection = sectionSize + ntaps;
 
@@ -181,7 +177,6 @@ int main(int argc, char *argv[])
 
     in1 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * wholeSection);
     out1 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * wholeSection);
-    diff = 0;
 
     q = fftw_plan_dft_1d(wholeSection,in1,out1,FFTW_FORWARD, FFTW_EXHAUSTIVE);
     m = fftw_plan_dft_1d(wholeSection,in1,out1,FFTW_BACKWARD, FFTW_EXHAUSTIVE);
@@ -233,16 +228,28 @@ int main(int argc, char *argv[])
                 if(flip)
                 {
                     data[(2*(n+ntaps))*fact2+(ds.high - firstchan - k)] = tmpr;
-                    data[(2*(n+ntaps))*fact2+(fact2 - (ds.high - firstchan - k))] = tmpr;
                     data[(2*(n+ntaps)+1)*fact2+(ds.high - firstchan - k)] = tmpi;
-                    data[(2*(n+ntaps)+1)*fact2+(fact2 - (ds.high - firstchan - k))] = -tmpi;
+
+                    if (k > 0)
+                    {
+                        data[(2*(n+ntaps))*fact2+(fact2 - (ds.high - firstchan - k))] = tmpr;
+                        data[(2*(n+ntaps)+1)*fact2+(fact2 - (ds.high - firstchan - k))] = -tmpi;
+                    }
                 }
                 else
                 {
                     data[(2*(n+ntaps))*fact2+(k+firstchan - ds.low)] = tmpr;
-                    data[(2*(n+ntaps))*fact2+(fact2 - (k+firstchan - ds.low))] = tmpr;
                     data[(2*(n+ntaps)+1)*fact2+(k+firstchan - ds.low)] = tmpi;
-                    data[(2*(n+ntaps)+1)*fact2+(fact2 - (k+firstchan - ds.low))] = tmpi;
+                    if (k > 0)
+                    {
+                        data[(2*(n+ntaps))*fact2+(fact2 - (k+firstchan - ds.low))] = tmpr;
+                        data[(2*(n+ntaps)+1)*fact2+(fact2 - (k+firstchan - ds.low))] = -tmpi;
+                    }
+                }
+                int temp = (2*(n+ntaps)+1)*fact2+(fact2 - (k+firstchan - ds.low));
+                if (temp >= wholeSection * fact2 * 2)
+                {
+                    printf("index:%d n:%d k:%d i:%d\n",temp,n,k,i);
                 }
 
             }
@@ -279,8 +286,6 @@ int main(int argc, char *argv[])
 
             }
         }
-
-
         // FILE *test5 = fopen("testing/dataffttest.dat", "w");
         // fwrite(data, 2 * wholeSection * fact2 * sizeof(float), 1, test5);
         // fclose(test5);
@@ -330,30 +335,11 @@ int main(int argc, char *argv[])
             fftconvolve(rndata, indata, wholeSection, qrm[r], ntaps, rndata, indata, q, m);
             for(n=0;n<sectionSize;n++)
             {
-                data[((n+ntaps)*2)*fact2 + r] = rndata[n+ntaps];
-                data[((n+ntaps)*2 + 1)*fact2 + r] = indata[n+ntaps];
-            }
-            rmax[r] = max(rndata, wholeSection);
-            rmin = min(rndata, wholeSection);
-            if(rmax[r] > -1*(rmin))
-            {
-                rmax[r] = 128/rmax[r];
-            }
-            else
-            {
-                rmax[r] = -127/rmin;
-            }
-            imax[r] = max(indata, wholeSection);
-            imin = min(indata, wholeSection);
-            if(imax[r] > -1*(imin))
-            {
-                imax[r] = 128/imax[r];
-            }
-            else
-            {
-                imax[r] = -127/imin;
+                data[((n+ntaps)*2)*fact2 + r] = rndata[n+ntaps]/fchans;
+                data[((n+ntaps)*2 + 1)*fact2 + r] = indata[n+ntaps]/fchans;
             }
         }
+
 
         // FILE *test7 = fopen("testing/predatatest.dat", "w");
         // fwrite(predata, 2 * ntaps * fact2 * sizeof(float), 1, test7);
@@ -363,19 +349,16 @@ int main(int argc, char *argv[])
         // fwrite(data, 2 * wholeSection * fact2 * sizeof(float), 1, test8);
         // fclose(test8);
         //}
-        rmin = min(rmax, fact2);
-        imin = min(imax, fact2);
-
-        if (rmin < imin)
-        {
-            imin = rmin;
-        }
         for(r=0;r<fact2;r++)
         {
             for(n=0;n<sectionSize;n++)
             {
-                odata[(n*fact2 + r)*2] = (int8_t)round(data[((n+ntaps)*2)*fact2 + r]*imin);
-                odata[(n*fact2 + r)*2 + 1] = (int8_t)round(data[((n+ntaps)*2 + 1)*fact2 + r]*imin);
+                if(abs(data[((n+ntaps)*2)*fact2 + r]) > 127)
+                {
+                    imin++;
+                }
+                odata[(n*fact2 + r)*2] = (int8_t)round(data[((n+ntaps)*2)*fact2 + r]);
+                odata[(n*fact2 + r)*2 + 1] = (int8_t)round(data[((n+ntaps)*2 + 1)*fact2 + r]);
             }
         }
         memset(data,0,2 * wholeSection * fact2 * sizeof *data);

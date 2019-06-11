@@ -145,12 +145,9 @@ void read_vcs(FILE *file, uint8_t data[],int data_length) /*reads the data from
     //open file and variable Initialisation
     uint8_t *buffer;
     int i;
-    long int ft;
-
 
     //Read file into buffer as uint8_t
     buffer = (uint8_t *)malloc(data_length * sizeof(uint8_t));
-    ft = ftell(file);
     if(fread(buffer, data_length * sizeof(uint8_t), 1, file)!= 1)
     {
         perror("Error reading data file\n");
@@ -285,45 +282,4 @@ void checkpars(struct parameters pars)
     {
         printf("All parameters specified.\n");
     }
-}
-
-int checkmem(void)
-{
-    //Initialise variables
-    FILE *memfile;
-    char buffer[50];
-    int memAv, swFree;
-
-    //Read file
-    memfile = fopen("/proc/meminfo", "r");
-    while(!feof(memfile))
-    {
-        if(fscanf(memfile, "%s", buffer)==0)
-        {
-            printf("Error reading memfile.\n");
-            exit(-1);
-        }
-        if(strcmp(buffer,"MemAvailable:") == 0)
-        {
-            if(fscanf(memfile, "%s", buffer)==0)
-            {
-                printf("Error reading memory value\n");
-                exit(-1);
-            }
-            memAv = (int)strtol(buffer, NULL, 10);
-        }
-        else if(strcmp(buffer, "SwapFree:")==0)
-        {
-            if(fscanf(memfile, "%s", buffer)==0)
-            {
-                printf("Error reading swap value\n");
-                exit(-1);
-            }
-            swFree = (int)strtol(buffer, NULL, 10);
-        }
-    }
-    fclose(memfile);
-    //calculate memory and return
-    memAv = memAv + swFree;
-    return memAv;
 }

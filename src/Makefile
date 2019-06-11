@@ -21,7 +21,7 @@ $(ODIR)/%.o: %.c $(DEPS)
 
 .PHONY: clean debug
 
-debug: CFLAGS = -I$(IDIR) -g -O3
+debug: CFLAGS = -I$(IDIR) -g -O3 -Wall
 debug: ../ipfb
 
 clean:

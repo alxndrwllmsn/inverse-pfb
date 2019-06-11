@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
     FILE *dfiles[nchans];
 
     ds = find_downsampled(fchans,firstchan, nchans);
-    printf("%d %d %d\n",ds.factor, ds.low, ds.high );
+    printf("Downsampling to %d channels (with conjugate),\nLow channel: %d, High channel: %d\n",ds.factor*2, ds.low, ds.high );
     //polyphase pad and fft filter
     ntaps = (int)flength/fchans;
     fact2 = ds.factor*2;
@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
     }
 
     //check number of sections (based on memory)
-    nsections = 5;
+    nsections = 200;
     sectionSize = 51200;
     wholeSection = sectionSize + ntaps;
 
@@ -244,13 +244,14 @@ int main(int argc, char *argv[])
                     {
                         data[(2*(n+ntaps))*fact2+(fact2 - (k+firstchan - ds.low))] = tmpr;
                         data[(2*(n+ntaps)+1)*fact2+(fact2 - (k+firstchan - ds.low))] = -tmpi;
+                        int temp = (2*(n+ntaps)+1)*fact2+(fact2 - (k+firstchan - ds.low));
+                        if (temp >= wholeSection * fact2 * 2)
+                        {
+                            printf("index:%d n:%d k:%d i:%d\n",temp,n,k,i);
+                        }
                     }
                 }
-                int temp = (2*(n+ntaps)+1)*fact2+(fact2 - (k+firstchan - ds.low));
-                if (temp >= wholeSection * fact2 * 2)
-                {
-                    printf("index:%d n:%d k:%d i:%d\n",temp,n,k,i);
-                }
+
 
             }
             // if(k==0)

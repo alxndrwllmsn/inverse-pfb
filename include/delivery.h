@@ -22,5 +22,4 @@ void read_filter(char *filename, int16_t fdata[], unsigned long filter_length);
 int exists(const char *fname);
 void checkpars(struct parameters pars);
 void write_output(char filename[], int8_t array[], int arraysize, char mode[2]);
-int checkmem(void);
 #endif

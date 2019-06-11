@@ -16,9 +16,6 @@ void fftconvolve(float rdata[], float idata[], int nsamples, float filter[],
     int flength,float outAr[], float ioutAr[], fftw_plan p, fftw_plan q);
 void fft(float rdata[], float idata[], int nsamples, float odata[],
     float oidata[], const fftw_plan p);
-void inverse_pfb(uint8_t data[], int16_t filter[], int nsamples,
-    int filter_length, int fchannels, int nchannels, int8_t outData[],
-    int chanloc, struct dsampled ds);
 struct dsampled find_downsampled(int fchan, int chanloc, int nchans);
 
 #endif

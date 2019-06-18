@@ -19,6 +19,19 @@ float max(float array[], int array_length)
     return buf;
 }
 
+float maxi(int16_t array[], int array_length)
+{
+    int i;
+    float buf = -32000;
+
+    for(i=0;i<array_length;i++){
+        if (array[i] > buf){
+            buf = array[i];
+        }
+    }
+    return buf;
+}
+
 float min(float array[], int array_length)
 {
     int i;
@@ -148,8 +161,8 @@ void fft(float rdata[], float idata[], int nsamples, float odata[], float oidata
 
     for(i=0;i<nsamples;i++)
     {
-        odata[i] = out[i][0]/sqrt(nsamples);
-        oidata[i] = out[i][1]/sqrt(nsamples);
+        odata[i] = out[i][0]/nsamples;
+        oidata[i] = out[i][1]/nsamples;
     }
 
     fftw_free(in);
@@ -160,7 +173,7 @@ struct dsampled find_downsampled(int fchan, int chanloc, int nchans)
 {
     struct dsampled ds;
 
-    int ulim = chanloc + nchans;
+    int ulim = chanloc + nchans - 1;
 
     int i, half;
     ds.factor = 1;

@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
     }
 
     //check number of sections (based on memory)
-    nsections = 5;
+    nsections = 200;
     sectionSize = 51200;
     wholeSection = sectionSize + ntaps;
 

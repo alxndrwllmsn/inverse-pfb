@@ -30,9 +30,8 @@ int main(int argc, char *argv[])
     uint8_t *chandata;
     int8_t *odata;
     float *data, *rndata, *indata, *predata;
-    float tmpr,tmpi;
+    float tmpr,tmpi,fmaxi;
     float imin = 0;
-    // FILE *test, *test2;
     FILE *info, *ofile, *norms;
     fftw_complex *in, *out, *in1,*out1;
     fftw_plan p, q, m;
@@ -63,10 +62,14 @@ int main(int argc, char *argv[])
 
     fdata = (int16_t *)malloc(flength * sizeof *fdata);
     read_filter(fname, fdata, flength);
-
-    // test = fopen("testing/fdatatest.dat", "w");
-    // fwrite(fdata, flength * sizeof *fdata, 1, test);
-    // fclose(test);
+    fmaxi = maxi(fdata,flength);
+    #ifdef DEBUG
+    {
+        FILE *test = fopen("fdatatest.dat", "w");
+        fwrite(fdata, flength * sizeof *fdata, 1, test);
+        fclose(test);
+    }
+    #endif
 
     //import wisdom
     if(exists("ipfbwisdom.ws"))
@@ -112,10 +115,14 @@ int main(int argc, char *argv[])
         }
     }
 
-    // test2 = fopen("testing/qrmtest.dat", "w");
-    // printf("factor*2:%d, ntaps:%d\n",fact2,ntaps);
-    // fwrite(qrm, fact2*ntaps * sizeof(float), 1, test2);
-    // fclose(test2);
+    #ifdef DEBUG
+    {
+        FILE *test2 = fopen("qrmtest.dat", "w");
+        printf("factor*2:%d, ntaps:%d\n",fact2,ntaps);
+        fwrite(qrm, fact2*ntaps * sizeof(float), 1, test2);
+        fclose(test2);
+    }
+    #endif
 
     //check flip
     flip = ((int)ds.high/ds.factor+1)%2;
@@ -158,7 +165,7 @@ int main(int argc, char *argv[])
     }
 
     //check number of sections (based on memory)
-    nsections = 200;
+    nsections = 5;
     sectionSize = 51200;
     wholeSection = sectionSize + ntaps;
 
@@ -227,13 +234,13 @@ int main(int argc, char *argv[])
                 }
                 if(flip)
                 {
-                    data[(2*(n+ntaps))*fact2+(ds.high - firstchan - k)] = tmpr;
-                    data[(2*(n+ntaps)+1)*fact2+(ds.high - firstchan - k)] = tmpi;
+                    data[(2*(n+ntaps))*fact2+(ds.high - firstchan - k-1)] = tmpr;
+                    data[(2*(n+ntaps)+1)*fact2+(ds.high - firstchan - k-1)] = tmpi;
 
-                    if (k > 0)
+                    if (k < (ds.high-ds.low-1))
                     {
-                        data[(2*(n+ntaps))*fact2+(fact2 - (ds.high - firstchan - k))] = tmpr;
-                        data[(2*(n+ntaps)+1)*fact2+(fact2 - (ds.high - firstchan - k))] = -tmpi;
+                        data[(2*(n+ntaps))*fact2+(fact2 - (ds.high - firstchan - k-1))] = tmpr;
+                        data[(2*(n+ntaps)+1)*fact2+(fact2 - (ds.high - firstchan - k-1))] = -tmpi;
                     }
                 }
                 else
@@ -254,12 +261,16 @@ int main(int argc, char *argv[])
 
 
             }
-            // if(k==0)
-            // {
-            //     FILE *test3 = fopen("chandatareadtest.dat", "w");
-            //     fwrite(chandata, 2 * sectionSize * sizeof(uint8_t), 1, test3);
-            //     fclose(test3);
-            // }
+            #ifdef DEBUG
+            {
+                if(k==0)
+                {
+                    FILE *test3 = fopen("chandatareadtest.dat", "w");
+                    fwrite(chandata, 2 * sectionSize * sizeof(uint8_t), 1, test3);
+                    fclose(test3);
+                }
+            }
+            #endif
             fseek(dfiles[k], 102400*(2*pars.ntiles-1), SEEK_CUR);
 
         }
@@ -287,9 +298,16 @@ int main(int argc, char *argv[])
 
             }
         }
-        // FILE *test5 = fopen("testing/dataffttest.dat", "w");
-        // fwrite(data, 2 * wholeSection * fact2 * sizeof(float), 1, test5);
-        // fclose(test5);
+        #ifdef DEBUG
+        {
+            if (i == 0)
+            {
+                FILE *test5 = fopen("dataffttest.dat", "w");
+                fwrite(data, 2 * wholeSection * fact2 * sizeof(float), 1, test5);
+                fclose(test5);
+            }
+        }
+        #endif
 
 
             /*prepend extra data unless it is the first section*/
@@ -304,13 +322,16 @@ int main(int argc, char *argv[])
                 }
             }
         }
-
-        // if (i==1)
-        // {
-        //     FILE *test6 = fopen("testing/dataprependtest.dat", "w");
-        //     fwrite(data, 2 * wholeSection * fact2 * sizeof(float), 1, test6);
-        //     fclose(test6);
-        // }
+        #ifdef DEBUG
+        {
+            if (i==1)
+            {
+                FILE *test6 = fopen("testing/dataprependtest.dat", "w");
+                fwrite(data, 2 * wholeSection * fact2 * sizeof(float), 1, test6);
+                fclose(test6);
+            }
+        }
+        #endif
 
             /*perform convolution
             {
@@ -336,27 +357,30 @@ int main(int argc, char *argv[])
             fftconvolve(rndata, indata, wholeSection, qrm[r], ntaps, rndata, indata, q, m);
             for(n=0;n<sectionSize;n++)
             {
-                data[((n+ntaps)*2)*fact2 + r] = rndata[n+ntaps]/fchans;
-                data[((n+ntaps)*2 + 1)*fact2 + r] = indata[n+ntaps]/fchans;
+                data[((n+ntaps)*2)*fact2 + r] = rndata[n+ntaps]/fmaxi;
+                data[((n+ntaps)*2 + 1)*fact2 + r] = indata[n+ntaps]/fmaxi;
             }
         }
 
+        #ifdef DEBUG
+        {
+            FILE *test7 = fopen("predatatest.dat", "w");
+            fwrite(predata, 2 * ntaps * fact2 * sizeof(float), 1, test7);
+            fclose(test7);
 
-        // FILE *test7 = fopen("testing/predatatest.dat", "w");
-        // fwrite(predata, 2 * ntaps * fact2 * sizeof(float), 1, test7);
-        // fclose(test7);
-        //
-        // FILE *test8 = fopen("testing/dataconvtest.dat", "w");
-        // fwrite(data, 2 * wholeSection * fact2 * sizeof(float), 1, test8);
-        // fclose(test8);
-        //}
+            FILE *test8 = fopen("dataconvtest.dat", "w");
+            fwrite(data, 2 * wholeSection * fact2 * sizeof(float), 1, test8);
+            fclose(test8);
+        }
+        #endif
         for(r=0;r<fact2;r++)
         {
             for(n=0;n<sectionSize;n++)
             {
-                if(abs(data[((n+ntaps)*2)*fact2 + r]) > 127)
+                if(fabs(data[((n+ntaps)*2)*fact2 + r]) > 127)
                 {
                     imin++;
+                    printf("Over %f\n",fabs(data[((n+ntaps)*2)*fact2 + r]));
                 }
                 odata[(n*fact2 + r)*2] = (int8_t)round(data[((n+ntaps)*2)*fact2 + r]);
                 odata[(n*fact2 + r)*2 + 1] = (int8_t)round(data[((n+ntaps)*2 + 1)*fact2 + r]);

@@ -9,6 +9,7 @@ struct dsampled
 };
 
 float max(float array[], int array_length);
+float maxi(int16_t array[], int array_length);
 float min(float array[], int array_length);
 void convolve(float data[],int nsamples, float filter[], int flength,
     float outAr[]);

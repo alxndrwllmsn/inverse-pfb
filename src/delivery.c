@@ -253,6 +253,11 @@ void checkpars(struct parameters pars)
         printf("nchannels not specified\n");
         a=1;
     }
+    if(pars.nchannels == 1)
+    {
+        printf("The processing is pointless with only one channel...\n");
+        a=1;
+    }
     if(pars.firstchan == -1)
     {
         printf("firstchan not specified\n");

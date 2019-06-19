@@ -39,15 +39,16 @@ def clipCheck(pars, t, p):
         return False
 
 
-def worker(pars, t, p):
+def worker(rank, pars, t, p):
     repeat = True
     count = 0
     while repeat:
         # create parfile
         genParFile(pars, t, p)
+        print("amplification: {}, processor: {}".format(pars['amplification'],rank))
         # run ipfb on parfile
         out = sp.check_output(['./ipfb', 'tmppars/tmppar{}_{}.txt'.format(t, p)], stderr=sp.STDOUT)
-        print(out.decode('utf-8'))
+        # print(out.decode('utf-8'))
         # check for clipping
         if clipCheck(pars, t, p):
             print("Value clipped, repeating with lower amplification.")
@@ -57,6 +58,8 @@ def worker(pars, t, p):
             else:
                 repeat = True
             pars['amplification'] = str(int(pars['amplification'])//2)
+        else:
+            repeat = False
         # remove parfile
         # os.remove('tmppars/tmppar{}_{}.txt'.format(t, p))
 
@@ -100,7 +103,9 @@ def run_MPI(args,trange):
         t, p = np.mgrid[trange[0]:trange[1]:1, 0:2:1]
         t = t.reshape(nstreams)
         p = p.reshape(nstreams)
-        worker(pars, t[rank], p[rank])
+        print("tile: {}, pol: {}".format(t[rank], p[rank]))
+        worker(rank, pars, t[rank], p[rank])
+        print("processor {} complete\n".format(rank))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

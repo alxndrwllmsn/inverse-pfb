@@ -47,17 +47,21 @@ def worker(rank, pars, t, p):
         genParFile(pars, t, p)
         print("amplification: {}, processor: {}".format(pars['amplification'],rank))
         # run ipfb on parfile
-        out = sp.check_output(['./ipfb', 'tmppars/tmppar{}_{}.txt'.format(t, p)], stderr=sp.STDOUT)
-        # print(out.decode('utf-8'))
+        try:
+            sp.check_output(['./ipfb', 'tmppars/tmppar{}_{}.txt'.format(t, p)], stderr=sp.STDOUT)
+        except sp.CalledProcessError as e:
+            out = e.output.decode('utf-8').split('\n')[-2].split(' ')
+            amp = float(out[1])
         # check for clipping
-        if clipCheck(pars, t, p):
+        print(amp)
+        if amp != 1:
             print("Value clipped, repeating with lower amplification.")
             if pars['amplification'] == 1:
                 repeat = False
                 print("amplification is already 1, cannot reduce anymore (there is an issue).")
             else:
                 repeat = True
-            pars['amplification'] = str(int(pars['amplification'])//2)
+            pars['amplification'] = str(int(float(pars['amplification']))*100//amp)
         else:
             repeat = False
         # remove parfile

@@ -8,7 +8,7 @@ struct parameters
     char outputdir[50];
     long filterlen;
     int filterchans;
-    long nsamples;
+    int ampl;
     int nchannels;
     int firstchan;
     int ntiles;

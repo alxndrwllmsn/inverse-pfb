@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
     int8_t *odata;
     float *data, *rndata, *indata, *predata;
     float tmpr,tmpi,fmaxi;
-    float imin = 0;
+    int imin = 0;
     FILE *info, *ofile, *norms;
     fftw_complex *in, *out, *in1,*out1;
     fftw_plan p, q, m;
@@ -47,13 +47,13 @@ int main(int argc, char *argv[])
             "outputdir: %s\n"
             "filterlen: %ld\n"
             "filterchans: %d\n"
-            "nsamples: %ld\n"
+            "amplification: %d\n"
             "nchannels: %d\n"
             "firstchan: %d\n"
             "ntiles: %d\n"
             "tile: %d\n"
             "pol: %d\n",pars.datadir, pars.filterfname, pars.outputdir,
-            pars.filterlen, pars.filterchans, pars.nsamples, pars.nchannels,
+            pars.filterlen, pars.filterchans, pars.ampl, pars.nchannels,
             pars.firstchan, pars.ntiles, pars.tile, pars.pol);
 
     //read filter
@@ -357,8 +357,8 @@ int main(int argc, char *argv[])
             fftconvolve(rndata, indata, wholeSection, qrm[r], ntaps, rndata, indata, q, m);
             for(n=0;n<sectionSize;n++)
             {
-                data[((n+ntaps)*2)*fact2 + r] = rndata[n+ntaps]/fmaxi;
-                data[((n+ntaps)*2 + 1)*fact2 + r] = indata[n+ntaps]/fmaxi;
+                data[((n+ntaps)*2)*fact2 + r] = rndata[n+ntaps]*pars.ampl/fmaxi;
+                data[((n+ntaps)*2 + 1)*fact2 + r] = indata[n+ntaps]*pars.ampl/fmaxi;
             }
         }
 
@@ -388,7 +388,7 @@ int main(int argc, char *argv[])
         }
         memset(data,0,2 * wholeSection * fact2 * sizeof *data);
         //write normalisation factor to file
-        fprintf(norms, "%f\n",imin);
+        fprintf(norms, "%d\n",imin);
         //write section to file
         printf("Writing section %d\n",i+1);
         fwrite(odata, sectionSize * 2 * fact2 *sizeof *odata, 1, ofile);

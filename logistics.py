@@ -5,7 +5,7 @@ import argparse
 
 
 def genParFile(pars,t,p):
-    file = open("tmppar{}_{}.txt".format(t, p),"w")
+    file = open("tmppars/tmppar{}_{}.txt".format(t, p),"w")
     file.write("""{}    {}
 {}  {}
 {}  {}
@@ -21,7 +21,7 @@ def genParFile(pars,t,p):
                  'outputdir', pars['outputdir'],
                  'filter_length', pars['filter_length'],
                  'filter_chans', pars['filter_chans'],
-                 'nsamples', pars['nsamples'],
+                 'amplification', pars['amplification'],
                  'nchannels', pars['nchannels'],
                  'firstchan', pars['firstchan'],
                  'ntiles', pars['ntiles'],
@@ -31,14 +31,34 @@ def genParFile(pars,t,p):
     file.close()
 
 
+def clipCheck(pars, t, p):
+    n = np.loadtxt("{}/norms_{}_{}.txt".format(pars['outputdir'], t, p))
+    if n.sum() > 0:
+        return True
+    else:
+        return False
+
+
 def worker(pars, t, p):
-    #create parfile
-    genParFile(pars,t,p)
-    #run ipfb on parfile
-    out = sp.check_output(['./ipfb', 'tmppar{}_{}.txt'.format(t, p)], stderr=sp.STDOUT)
-    print(out.decode('utf-8'))
-    #remove parfile
-    os.remove('tmppar{}_{}.txt'.format(t, p))
+    repeat = True
+    count = 0
+    while repeat:
+        # create parfile
+        genParFile(pars, t, p)
+        # run ipfb on parfile
+        out = sp.check_output(['./ipfb', 'tmppars/tmppar{}_{}.txt'.format(t, p)], stderr=sp.STDOUT)
+        print(out.decode('utf-8'))
+        # check for clipping
+        if clipCheck(pars, t, p):
+            print("Value clipped, repeating with lower amplification.")
+            if pars['amplification'] == 1:
+                repeat = False
+                print("amplification is already 1, cannot reduce anymore (there is an issue).")
+            else:
+                repeat = True
+            pars['amplification'] = str(int(pars['amplification'])//2)
+        # remove parfile
+        # os.remove('tmppars/tmppar{}_{}.txt'.format(t, p))
 
 
 

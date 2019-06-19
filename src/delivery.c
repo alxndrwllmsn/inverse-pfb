@@ -74,7 +74,7 @@ struct parameters getpars(char *parfname) /*returns the values from a parameter
             }
             pars.filterchans = (int)strtol(buff2, &p, 10);
         }
-        else if(strcmp(buff,"nsamples") == 0)
+        else if(strcmp(buff,"amplification") == 0)
         {
             if(fscanf(pf, "%s", buff2)==0)
             {
@@ -82,7 +82,7 @@ struct parameters getpars(char *parfname) /*returns the values from a parameter
                 perror(errm);
                 exit(3);
             }
-            pars.nsamples = strtol(buff2,&p,10);
+            pars.ampl = (int)strtol(buff2,&p,10);
         }
         else if(strcmp(buff,"nchannels") == 0)
         {
@@ -243,9 +243,9 @@ void checkpars(struct parameters pars)
         printf("filter_chans not specified\n");
         a=1;
     }
-    if(pars.nsamples == -1)
+    if(pars.ampl == -1)
     {
-        printf("nsamples not specified\n");
+        printf("amplification not specified\n");
         a=1;
     }
     if(pars.nchannels == -1)

@@ -3,9 +3,9 @@
 
 struct parameters
 {
-    char datadir[50];
+    char datadir[100];
     char filterfname[50];
-    char outputdir[50];
+    char outputdir[100];
     long filterlen;
     int filterchans;
     int ampl;

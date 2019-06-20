@@ -203,6 +203,7 @@ int main(int argc, char *argv[])
     strcpy(infotextcat,pars.outputdir);
     sprintf(buffer,"/out_%d_%d.dat",pars.tile, pars.pol);
     strcat(infotextcat,buffer);
+    printf("%s\n",infotextcat);
     ofile = fopen(infotextcat,"w");
     // sprintf(buffer,"%s/norms_%d_%d.txt",pars.outputdir,pars.tile,pars.pol);
     // norms = fopen(buffer,"w");

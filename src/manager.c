@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
 
     //Initialise variables
     char *parfile = argv[1];
-    char fname[100], infotextcat[50], buffer[100], errormessage[100];
+    char fname[100], infotextcat[100], buffer[100], errormessage[100];
     char *infotext = ".info";
     struct parameters pars = {"notdfile","notffile","notoutfile",-1,-1,-1,-1,-1,
                                 -1,-1,-1};

@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
     float *data, *rndata, *indata, *predata;
     float tmpr,tmpi,fmaxi;
     int imin = 0;
-    FILE *info, *ofile, *norms;
+    FILE *info, *ofile;
     fftw_complex *in, *out, *in1,*out1;
     fftw_plan p, q, m;
 
@@ -204,8 +204,8 @@ int main(int argc, char *argv[])
     sprintf(buffer,"/out_%d_%d.dat",pars.tile, pars.pol);
     strcat(infotextcat,buffer);
     ofile = fopen(infotextcat,"w");
-    sprintf(buffer,"%s/norms_%d_%d.txt",pars.outputdir,pars.tile,pars.pol);
-    norms = fopen(buffer,"w");
+    // sprintf(buffer,"%s/norms_%d_%d.txt",pars.outputdir,pars.tile,pars.pol);
+    // norms = fopen(buffer,"w");
 
     odata = (int8_t *)malloc(sectionSize * fact2 * 2 *sizeof *odata);
 
@@ -326,7 +326,7 @@ int main(int argc, char *argv[])
         {
             if (i==1)
             {
-                FILE *test6 = fopen("testing/dataprependtest.dat", "w");
+                FILE *test6 = fopen("dataprependtest.dat", "w");
                 fwrite(data, 2 * wholeSection * fact2 * sizeof(float), 1, test6);
                 fclose(test6);
             }
@@ -381,7 +381,6 @@ int main(int argc, char *argv[])
                 {
                     imin++;
                     printf("Over %f\n",fabs(data[((n+ntaps)*2)*fact2 + r]));
-                    exit(100);
                 }
                 odata[(n*fact2 + r)*2] = (int8_t)round(data[((n+ntaps)*2)*fact2 + r]);
                 odata[(n*fact2 + r)*2 + 1] = (int8_t)round(data[((n+ntaps)*2 + 1)*fact2 + r]);
@@ -389,7 +388,7 @@ int main(int argc, char *argv[])
         }
         memset(data,0,2 * wholeSection * fact2 * sizeof *data);
         //write normalisation factor to file
-        fprintf(norms, "%d\n",imin);
+        // fprintf(norms, "%d\n",imin);
         //write section to file
         printf("Writing section %d\n",i+1);
         fwrite(odata, sectionSize * 2 * fact2 *sizeof *odata, 1, ofile);
@@ -415,6 +414,6 @@ int main(int argc, char *argv[])
         fclose(dfiles[i]);
     }
     fclose(ofile);
-    fclose(norms);
+    // fclose(norms);
 
 }

@@ -51,7 +51,6 @@ def worker(rank, pars, t, p):
         try:
             sp.check_output(['./ipfb', 'tmppars/tmppar{}_{}.txt'.format(t, p)], stderr=sp.STDOUT)
         except sp.CalledProcessError as e:
-            print(e.output)
             out = e.output.decode('utf-8').split('\n')[-2].split(' ')
             amp = float(out[1])
         # check for clipping

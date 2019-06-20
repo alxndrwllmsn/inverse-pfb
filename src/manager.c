@@ -382,6 +382,7 @@ int main(int argc, char *argv[])
                 {
                     imin++;
                     printf("Over %f\n",fabs(data[((n+ntaps)*2)*fact2 + r]));
+                    exit(100);
                 }
                 odata[(n*fact2 + r)*2] = (int8_t)round(data[((n+ntaps)*2)*fact2 + r]);
                 odata[(n*fact2 + r)*2 + 1] = (int8_t)round(data[((n+ntaps)*2 + 1)*fact2 + r]);

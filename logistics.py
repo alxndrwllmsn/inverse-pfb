@@ -45,6 +45,7 @@ def worker(rank, pars, t, p):
     while repeat:
         # create parfile
         genParFile(pars, t, p)
+        amp = 1
         print("amplification: {}, processor: {}".format(pars['amplification'],rank))
         # run ipfb on parfile
         try:
@@ -53,7 +54,6 @@ def worker(rank, pars, t, p):
             out = e.output.decode('utf-8').split('\n')[-2].split(' ')
             amp = float(out[1])
         # check for clipping
-        print(amp)
         if amp != 1:
             print("Value clipped, repeating with lower amplification.")
             if pars['amplification'] == 1:

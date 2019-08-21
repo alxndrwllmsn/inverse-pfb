@@ -111,6 +111,8 @@ def run_MPI(args,trange):
         worker(rank, pars, t[rank], p[rank])
         print("processor {} complete\n".format(rank))
 
+    comm.barrier()
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("parfile", help="The parameter file from which to read.")

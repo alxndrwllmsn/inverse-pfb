@@ -159,14 +159,14 @@ int main(int argc, char *argv[])
             perror(errormessage);
             exit(23);
         }
-        fseek(dfiles[i], 4096+102400*2*pars.ntiles, SEEK_SET);
-        fseek(dfiles[i], 102400*(2*pars.tile+pars.pol), SEEK_CUR);
+        fseek(dfiles[i], 4096+102400*2*pars.ntiles, SEEK_SET);//*This needs to change
+        fseek(dfiles[i], 102400*(2*pars.tile+pars.pol), SEEK_CUR);//*This needs to change
         printf("Moved marker into position\n");
     }
 
     //check number of sections (based on memory)
-    nsections = 200;
-    sectionSize = 51200;
+    nsections = 200;//*This needs to change
+    sectionSize = 51200;//*This needs to change
     wholeSection = sectionSize + ntaps;
 
     //allocate memory for data
@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
     out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * fact2);
 
     printf("Planning FFT's\n");
-    p = fftw_plan_dft_1d(fact2, in, out, FFTW_BACKWARD, FFTW_EXHAUSTIVE);
+    p = fftw_plan_dft_1d(fact2, in, out, FFTW_BACKWARD, FFTW_EXHAUSTIVE);//*This needs to change
 
     fftw_free(in);
     fftw_free(out);
@@ -220,7 +220,7 @@ int main(int argc, char *argv[])
         {
             printf("Reading in channel %d\n",k+1);
 
-            read_vcs(dfiles[k], chandata, sectionSize*2);
+            read_vcs(dfiles[k], chandata, sectionSize*2);//*This needs to change
             for (n=0;n<sectionSize;n++)
             {
                 tmpr = (float)(int)chandata[2*n];

@@ -10,14 +10,15 @@
 int main(int argc, char *argv[])
 {
     //Check arguments
-    if(argc < 2)
+    if(argc < 3)
     {
-        printf("usage: ipfbrun parameterfilename\n");
+        printf("usage: ipfbrun parameterfilename vcs\n");
         return 1;
     }
 
     //Initialise variables
     char *parfile = argv[1];
+    int vcs = strtol(argv[2],NULL,10);
     char fname[100], infotextcat[100], buffer[100], errormessage[100];
     char *infotext = ".info";
     struct parameters pars = {"notdfile","notffile","notoutfile",-1,-1,-1,-1,-1,
@@ -159,14 +160,29 @@ int main(int argc, char *argv[])
             perror(errormessage);
             exit(23);
         }
-        fseek(dfiles[i], 4096+102400*2*pars.ntiles, SEEK_SET);//*This needs to change
-        fseek(dfiles[i], 102400*(2*pars.tile+pars.pol), SEEK_CUR);//*This needs to change
+        if(vcs == 1)
+        {
+            fseek(dfiles[i], 2*(2*pars.tile+pars.pol), SEEK_SET);
+        }
+        else
+        {
+            fseek(dfiles[i], 4096+102400*2*pars.ntiles, SEEK_SET);
+            fseek(dfiles[i], 102400*(2*pars.tile+pars.pol), SEEK_CUR);
+        }
         printf("Moved marker into position\n");
     }
 
     //check number of sections (based on memory)
-    nsections = 200;//*This needs to change
-    sectionSize = 51200;//*This needs to change
+    if(vcs== 1)
+    {
+        nsections = 25;
+        sectionSize = 400;
+    }
+    else
+    {
+        nsections = 200;
+        sectionSize = 51200;
+    }
     wholeSection = sectionSize + ntaps;
 
     //allocate memory for data
@@ -219,8 +235,14 @@ int main(int argc, char *argv[])
         for (k=0;k<nchans;k++)
         {
             printf("Reading in channel %d\n",k+1);
-
-            read_vcs(dfiles[k], chandata, sectionSize*2);//*This needs to change
+            if(vcs==1)
+            {
+                actually_read_vcs(dfiles[k], chandata, sectionSize*2, pars);
+            }
+            else
+            {
+                read_vcs(dfiles[k], chandata, sectionSize*2);
+            }
             for (n=0;n<sectionSize;n++)
             {
                 tmpr = (float)(int)chandata[2*n];

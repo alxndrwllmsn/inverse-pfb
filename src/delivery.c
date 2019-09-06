@@ -161,19 +161,20 @@ void read_vcs(FILE *file, uint8_t data[],int data_length) /*reads the data from
     free(buffer);
 }
 
-void read_vcs(FILE *file, uint8_t data[],int data_length, struct parameters pars) /*reads the data from
+void actually_read_vcs(FILE *file, uint8_t data[],int data_length, struct parameters pars) /*reads the data from
                                                             the vcs file*/
 {
     //open file and variable Initialisation
     uint8_t *buffer;
     int i;
 
-    buffer = (uint8_t *)malloc(sizeof(uint8_t));
+    buffer = (uint8_t *)malloc(2*sizeof(uint8_t));
     //Read file into buffer as uint8_t
-    for(i=0;i<data_length;i++){
-        read(file, buffer, 1);
+    for(i=0;i<data_length;i=i+2){
+        read(file, buffer, 2);
         fseek(file, 128*pars.ntiles*4 - 1,SEEK_CUR);
-        data[i] = buffer;
+        data[i] = buffer[0];
+        data[i+1] = buffer[1];
     }
     //free memory
     free(buffer);

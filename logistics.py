@@ -4,8 +4,8 @@ import subprocess as sp
 import argparse
 
 
-def genParFile(pars,t,p):
-    file = open("tmppars/tmppar{}_{}.txt".format(t, p),"w")
+def genParFile(pars, t, p):
+    file = open("tmppars/tmppar{}_{}.txt".format(t, p), "w")
     file.write("""{}    {}
 {}  {}
 {}  {}
@@ -46,7 +46,7 @@ def worker(rank, pars, t, p):
         # create parfile
         genParFile(pars, t, p)
         amp = 1
-        print("amplification: {}, processor: {}".format(pars['amplification'],rank))
+        print("amplification: {}, processor: {}".format(pars['amplification'], rank))
         # run ipfb on parfile
         try:
             sp.check_output(['./ipfb', 'tmppars/tmppar{}_{}.txt'.format(t, p)], stderr=sp.STDOUT)
@@ -61,12 +61,11 @@ def worker(rank, pars, t, p):
                 print("amplification is already 1, cannot reduce anymore (there is an issue).")
             else:
                 repeat = True
-            pars['amplification'] = str(int(float(pars['amplification']))*100//amp)
+            pars['amplification'] = str(int(float(pars['amplification'])) * 100 // amp)
         else:
             repeat = False
         # remove parfile
         # os.remove('tmppars/tmppar{}_{}.txt'.format(t, p))
-
 
 
 def readpars(parfile):
@@ -79,27 +78,27 @@ def readpars(parfile):
     return pardict
 
 
-def runMultiProcess(args,trange):
+def runMultiProcess(args, trange):
     import multiprocessing as mp
 
     # read parameters from parfile
     pars = readpars(args.parfile)
     # loop over each stream
     jobs = []
-    for t in range(trange[0],trange[1]):
+    for t in range(trange[0], trange[1]):
         for p in range(2):
-            proc = mp.Process(target=worker, args=(pars, t, p, ))
+            proc = mp.Process(target=worker, args=(pars, t, p,))
             jobs.append(proc)
             proc.start()
 
 
-def run_MPI(args,trange):
+def run_MPI(args, trange):
     from mpi4py import MPI
     pars = readpars(args.parfile)
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
     nprocs = comm.Get_size()
-    nstreams = 2*(trange[1] - trange[0])
+    nstreams = 2 * (trange[1] - trange[0])
     if nstreams != nprocs:
         raise ValueError("Please set the number of processors to be equal to the number of voltage streams"
                          " (i.e. 2 times the number of tiles).")
@@ -113,14 +112,16 @@ def run_MPI(args,trange):
 
     comm.barrier()
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("parfile", help="The parameter file from which to read.")
     parser.add_argument("-t", "--tiles", help="The range of tiles to process (as present within the input file,"
-                                              " eg. '-t 0,12')",default=None)
-    parser.add_argument("-m","--mpi",help="Use mpi rather than multiprocess",action="store_true")
+                                              " eg. '-t 0,12')", default=None)
+    parser.add_argument("-m", "--mpi", help="Use mpi rather than multiprocess", action="store_true")
     args = parser.parse_args()
-    if args.tiles == None:
+
+    if args.tiles is None:
         raise ValueError("Please specify a range of tiles (eg. 0,12). Note that there are 24 cores on a magnus node, "
                          "therefore this range should have a multiple of 12 tiles (each tile has 2 polarisations)")
     else:
@@ -128,7 +129,7 @@ if __name__ == '__main__':
 
     if args.mpi:
         print("Running with MPI")
-        run_MPI(args,trange)
+        run_MPI(args, trange)
     else:
         print("Running with Multiprocess")
-        runMultiProcess(args,trange)
+        runMultiProcess(args, trange)

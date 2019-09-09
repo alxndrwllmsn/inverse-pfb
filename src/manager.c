@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
         }
         if(vcs == 1)
         {
-            fseek(dfiles[i], 2*(2*pars.tile+pars.pol), SEEK_SET);
+            fseek(dfiles[i], ((i*pars.ntiles + pars.tile)*2 + pars.pol)*2, SEEK_SET);
         }
         else
         {

@@ -151,7 +151,7 @@ void read_vcs(FILE *file, uint8_t data[],int data_length) /*reads the data from
     if(fread(buffer, data_length * sizeof(uint8_t), 1, file)!= 1)
     {
         perror("Error reading data file\n");
-        exit(22);
+        exit(25);
     }
 
     for(i=0;i<data_length;i++){

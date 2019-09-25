@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        nsections = 200;
+        nsections = 25; //Change this back to 200 after testing
         sectionSize = 51200;
     }
     wholeSection = sectionSize + ntaps;

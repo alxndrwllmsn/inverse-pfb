@@ -51,7 +51,7 @@ def worker(rank, pars, t, p):
         if args.vcs:
             ipfbcall = ['./ipfb', 'tmppars/tmppar{}_{}.txt'.format(t, p), '1']
         else:
-            ipfbcall = ['./ipfb', 'tmppars/tmppar{}_{}.txt'.format(t, p)]
+            ipfbcall = ['./ipfb', 'tmppars/tmppar{}_{}.txt'.format(t, p), '0']
         try:
             sp.check_output(ipfbcall, stderr=sp.STDOUT)
         except sp.CalledProcessError as e:

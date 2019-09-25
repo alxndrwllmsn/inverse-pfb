@@ -48,11 +48,17 @@ def worker(rank, pars, t, p):
         amp = 1
         print("amplification: {}, processor: {}".format(pars['amplification'], rank))
         # run ipfb on parfile
+        if args.vcs:
+            ipfbcall = ['./ipfb', 'tmppars/tmppar{}_{}.txt'.format(t, p), '1']
+        else:
+            ipfbcall = ['./ipfb', 'tmppars/tmppar{}_{}.txt'.format(t, p)]
         try:
-            sp.check_output(['./ipfb', 'tmppars/tmppar{}_{}.txt'.format(t, p)], stderr=sp.STDOUT)
+            sp.check_output(ipfbcall, stderr=sp.STDOUT)
         except sp.CalledProcessError as e:
             out = e.output.decode('utf-8').split('\n')[-2].split(' ')
+            print(e.output.decode('utf-8'))
             amp = float(out[1])
+            print(amp)
         # check for clipping
         if amp != 1:
             print("Value clipped, repeating with lower amplification.")
@@ -119,6 +125,7 @@ if __name__ == '__main__':
     parser.add_argument("-t", "--tiles", help="The range of tiles to process (as present within the input file,"
                                               " eg. '-t 0,12')", default=None)
     parser.add_argument("-m", "--mpi", help="Use mpi rather than multiprocess", action="store_true")
+    parser.add_argument("-v", "--vcs", help="The input is vcs format", action="store_true")
     args = parser.parse_args()
 
     if args.tiles is None:

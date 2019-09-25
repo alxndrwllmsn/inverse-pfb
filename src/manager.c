@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
     //Initialise variables
     char *parfile = argv[1];
     int vcs = strtol(argv[2],NULL,10);
-    char fname[100], infotextcat[100], buffer[100], errormessage[100];
+    char fname[200], infotextcat[100], buffer[100], errormessage[100];
     char *infotext = ".info";
     struct parameters pars = {"notdfile","notffile","notoutfile",-1,-1,-1,-1,-1,
                                 -1,-1,-1};
@@ -163,6 +163,7 @@ int main(int argc, char *argv[])
         if(vcs == 1)
         {
             fseek(dfiles[i], ((i*pars.ntiles + pars.tile)*2 + pars.pol)*2, SEEK_SET);
+            printf("%i\n",((i*pars.ntiles + pars.tile)*2 + pars.pol)*2);
         }
         else
         {
@@ -286,7 +287,7 @@ int main(int argc, char *argv[])
             }
             #ifdef DEBUG
             {
-                if(k==0)
+                if((k==0))
                 {
                     FILE *test3 = fopen("chandatareadtest.dat", "w");
                     fwrite(chandata, 2 * sectionSize * sizeof(uint8_t), 1, test3);
@@ -294,8 +295,10 @@ int main(int argc, char *argv[])
                 }
             }
             #endif
-            fseek(dfiles[k], 102400*(2*pars.ntiles-1), SEEK_CUR);
-
+            if (vcs!=1)
+            {
+                fseek(dfiles[k], 102400*(2*pars.ntiles-1), SEEK_CUR);
+            }
         }
 
         // FILE *test4 = fopen("testing/datareadtest.dat", "w");

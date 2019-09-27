@@ -2,15 +2,19 @@ import numpy as np
 import argparse as ap
 import os
 
-if __name__ == '__main__':
+
+def rearrange_as_module(directory, nsamples, ntiles, output_file):
     parser = ap.ArgumentParser()
     parser.add_argument("directory")
     parser.add_argument("nsamples", type=np.int)
     parser.add_argument("ntiles", type=np.int)
     parser.add_argument("output_file")
 
-    args = parser.parse_args()
+    args = parser.parse_args([directory, int(nsamples), int(ntiles), output_file])
+    main(args)
 
+
+def main(args):
     data = np.zeros((args.nsamples//51200, args.ntiles, 2, 51200, 2), dtype=np.int8)
 
     os.chdir(args.directory)
@@ -24,3 +28,14 @@ if __name__ == '__main__':
     header.tofile(file)
     data.tofile(file)
     file.close()
+
+
+if __name__ == '__main__':
+    parser = ap.ArgumentParser()
+    parser.add_argument("directory")
+    parser.add_argument("nsamples", type=np.int)
+    parser.add_argument("ntiles", type=np.int)
+    parser.add_argument("output_file")
+
+    args = parser.parse_args()
+    main(args)

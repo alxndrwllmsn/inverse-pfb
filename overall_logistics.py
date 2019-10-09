@@ -8,17 +8,18 @@ from rearrangedata import rearrange_as_module
 
 def fine_inversion(datadir, fprefix, parfile, fchanC, nchanC, nchanF, srun, vcs):
     for k in range(fchanC, fchanC + nchanC):
+        print("Coarse Channel: {}".format(k))
         write_info_f(datadir, fprefix, k, nchanF)
         pars = write_parfile(parfile, k)
-        setup_out_dir(pars, k)
-        run_logistics(srun, parfile, pars, vcs)
+        setup_out_dir(pars["outputdir"], k)
+        run_logistics(srun, "tmpparfileF.txt", pars, vcs)
     return pars
 
 
 def write_info_f(directory, prefix, chan, nchanF):
     owd = os.getcwd()
     os.chdir("{}/../".format(directory))
-    fname = directory.split[-1]
+    fname = directory.split('/')[-1]
     file = open("{}.info".format(fname), "w")
     textout = "{}_{}.dat".format(prefix, chan)      # Check format of input filenames
     for i in range(nchanF):
@@ -59,58 +60,70 @@ def write_parfile(parfile, chanC):
 def setup_out_dir(outdir, chanC):
     owd = os.getcwd()
     os.chdir(outdir)
-    os.mkdir("{}/{}".format(outdir, chanC))
+    os.mkdir("{}".format(chanC))
     os.chdir(owd)
 
 
 def run_logistics(srun, parfile, pars, vcs):
-    nprocs = int(pars['ntiles']*2)
+    nprocs = int(pars['ntiles'])*2
     nnodes = int(np.ceil(nprocs/24))
-    logrun = ["mpirun", "-n", "{}".format(nprocs), "-N", "{}".format(nnodes), "-c", "1", "python",
-              "logistics.py", parfile, "-t", "0,{}".format(pars['ntiles']), "-m"]
+    logrun = ["mpirun", "-n", "{}".format(nprocs), "python", "logistics.py", "{}".format(parfile), "-t",
+              "0,{}".format(pars['ntiles']), "-m"]
     if srun:
         logrun[0] = "srun"
+        logrun.insert(2, "-N")
+        logrun.insert(3, "{}".format(nnodes))
+        logrun.insert(4, "-c")
+        logrun.insert(5, "1")
     if vcs:
         logrun.append("-v")
 
-    out = sp.check_output(logrun, stderr=sp.STDOUT)
-    print(out)
+    sp.check_output(logrun, stderr=sp.STDOUT)
 
 
 def rearrange(fchanC, nchanC, pars, prefix, datadir): # note: nsamples is set for 1 second files
+    owd = os.getcwd()
     for i in range(fchanC, fchanC + nchanC):
-        directory = "{}/{}".format(pars["outputdir"], nchanC)
-        rearrange_as_module(directory, 1280000, pars["ntiles"], "{}/{}_{}.sub".format(datadir, prefix, i))
+        directory = "{}/{}".format(pars["outputdir"], i)
+        rearrange_as_module(directory, 1280000, pars["ntiles"], "{}/{}/{}_{}.sub".format(owd, datadir, prefix, i))
 
 
 def coarse_inversion(pars, fchanC, nchanC, cPrefix, srun, parfile, vcs):
-    write_info_c(pars["datadir"], fchanC, nchanC, cPrefix)
+    write_info_c(pars["datadir"], fchanC, nchanC, cPrefix, pars["outputdir"])
     run_logistics(srun, parfile, pars, vcs)
 
 
-def write_info_c(directory, fchanC, nchanC, cPrefix):
+def write_info_c(directory, fchanC, nchanC, cPrefix, outdir):
     owd = os.getcwd()
     os.chdir("{}/..".format(directory))
     file = open("{}.info".format(directory.split('/')[-1]), "w")
     for i in range(fchanC, fchanC + nchanC):
         file.write("{}_{}.sub\n".format(cPrefix, i))
     file.close()
+    os.chdir(owd)
+    os.chdir(outdir)
+    os.mkdir("all")
+    os.chdir(owd)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument("parfile", help="The master parfile for entire run.")
 
     args = parser.parse_args()
 
+    print("Reading parameter file: {}".format(args.parfile))
     mpars = readpars(args.parfile)
 
-    pars = fine_inversion(mpars["datadir"], mpars["fine_prefix"], mpars["fine_parfile"], mpars["coarse_first_chan"],
-                          mpars["coarse_nchans"], mpars["fine_nchans"], mpars["srun"], 1)
+    print("running fine inversion")
+    pars = fine_inversion(mpars["datadir"], mpars["fine_prefix"], mpars["fine_parfile"], int(mpars["coarse_first_chan"]),
+                          int(mpars["coarse_nchans"]), int(mpars["fine_nchans"]), int(mpars["srun"]), 1)
 
-    rearrange(mpars["coarse_first_chan"], pars["coarse_nchans"], pars, mpars["coarse_prefix"], mpars["datadir"])
+    print("rearranging data for re - input")
+    rearrange(int(mpars["coarse_first_chan"]), int(mpars["coarse_nchans"]), pars, mpars["coarse_prefix"], mpars["datadir"])
 
-    coarse_inversion(pars, mpars["coarse_first_chan"], pars["coarse_nchans"], mpars["coarse_prefix"], mpars["srun"],
+    print("running coarse inversion")
+    coarse_inversion(pars, int(mpars["coarse_first_chan"]), int(mpars["coarse_nchans"]), mpars["coarse_prefix"], int(mpars["srun"]),
                      mpars["coarse_parfile"], 0)
 

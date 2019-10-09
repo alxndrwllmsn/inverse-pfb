@@ -79,7 +79,8 @@ def readpars(parfile):
     pardict = {}
     for line in file:
         words = line.split()
-        pardict[words[0]] = words[1]
+        if len(words) != 0:
+            pardict[words[0]] = words[1]
     file.close()
     return pardict
 

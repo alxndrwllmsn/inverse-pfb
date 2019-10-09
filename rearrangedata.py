@@ -10,13 +10,13 @@ def rearrange_as_module(directory, nsamples, ntiles, output_file):
     parser.add_argument("ntiles", type=np.int)
     parser.add_argument("output_file")
 
-    args = parser.parse_args([directory, int(nsamples), int(ntiles), output_file])
+    args = parser.parse_args([directory, "{}".format(nsamples), "{}".format(ntiles), output_file])
     main(args)
 
 
 def main(args):
     data = np.zeros((args.nsamples//51200, args.ntiles, 2, 51200, 2), dtype=np.int8)
-
+    owd = os.getcwd()
     os.chdir(args.directory)
 
     for tile in range(args.ntiles):
@@ -28,6 +28,7 @@ def main(args):
     header.tofile(file)
     data.tofile(file)
     file.close()
+    os.chdir(owd)
 
 
 if __name__ == '__main__':

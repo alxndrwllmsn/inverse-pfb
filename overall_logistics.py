@@ -17,6 +17,7 @@ def fine_inversion(datadir, fprefix, parfile, fchanC, nchanC, nchanF, srun, vcs)
 
 
 def write_info_f(directory, prefix, chan, nchanF):
+    print("Writing .info file")
     owd = os.getcwd()
     os.chdir("{}/../".format(directory))
     fname = directory.split('/')[-1]
@@ -29,6 +30,7 @@ def write_info_f(directory, prefix, chan, nchanF):
 
 
 def write_parfile(parfile, chanC):
+    print("writing temporary parameter file F")
     pars = readpars(parfile)
     file = open("tmpparfileF.txt", "w")
     file.write("""{}    {}
@@ -58,6 +60,7 @@ def write_parfile(parfile, chanC):
 
 
 def setup_out_dir(outdir, chanC):
+    print("setting up output directories: {}/{}".format(outdir, chanC))
     owd = os.getcwd()
     os.chdir(outdir)
     os.mkdir("{}".format(chanC))
@@ -65,6 +68,7 @@ def setup_out_dir(outdir, chanC):
 
 
 def run_logistics(srun, parfile, pars, vcs):
+    print("running ipfb logistics")
     nprocs = int(pars['ntiles'])*2
     nnodes = int(np.ceil(nprocs/24))
     logrun = ["mpirun", "-n", "{}".format(nprocs), "python", "logistics.py", "{}".format(parfile), "-t",
@@ -100,6 +104,7 @@ def coarse_inversion(pars, fchanC, nchanC, cPrefix, srun, parfile, vcs):
 
 
 def write_info_c(directory, fchanC, nchanC, cPrefix, outdir):
+    print("writing info file")
     owd = os.getcwd()
     os.chdir("{}/..".format(directory))
     file = open("{}.info".format(directory.split('/')[-1]), "w")

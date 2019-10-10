@@ -71,7 +71,7 @@ def run_logistics(srun, parfile, pars, vcs):
     print("running ipfb logistics")
     nprocs = int(pars['ntiles'])*2
     nnodes = int(np.ceil(nprocs/24))
-    logrun = ["mpirun", "-n", "{}".format(nprocs), "python", "logistics.py", "{}".format(parfile), "-t",
+    logrun = ["mpirun", "-n", "{}".format(nprocs), "python3", "logistics.py", "{}".format(parfile), "-t",
               "0,{}".format(pars['ntiles']), "-m"]
     if srun:
         logrun[0] = "srun"

@@ -21,7 +21,7 @@ def write_info_f(directory, prefix, chan, nchanF):
     os.chdir("{}/../".format(directory))
     fname = directory.split('/')[-1]
     file = open("{}.info".format(fname), "w")
-    textout = "{}_{}.dat".format(prefix, chan)      # Check format of input filenames
+    textout = "{}_ch{}.dat".format(prefix, chan)      # Check format of input filenames
     for i in range(nchanF):
         file.write("{}\n".format(textout))
     file.close()

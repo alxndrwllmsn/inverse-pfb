@@ -78,7 +78,13 @@ def run_logistics(srun, parfile, pars, vcs):
     if vcs:
         logrun.append("-v")
 
-    sp.check_output(logrun, stderr=sp.STDOUT)
+    try:
+        output = sp.check_output(logrun, stderr=sp.STDOUT).decode()
+        print(output)
+    except sp.CalledProcessError as e:
+        output = e.output.decode()
+        print(output)
+        raise sp.CalledProcessError
 
 
 def rearrange(fchanC, nchanC, pars, prefix, datadir): # note: nsamples is set for 1 second files

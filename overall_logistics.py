@@ -71,10 +71,10 @@ def run_logistics(srun, parfile, pars, vcs):
               "0,{}".format(pars['ntiles']), "-m"]
     if srun:
         logrun[0] = "srun"
-        logrun.insert(2, "-N")
-        logrun.insert(3, "{}".format(nnodes))
-        logrun.insert(4, "-c")
-        logrun.insert(5, "1")
+        logrun.insert(3, "-N")
+        logrun.insert(4, "{}".format(nnodes))
+        logrun.insert(5, "-c")
+        logrun.insert(6, "1")
     if vcs:
         logrun.append("-v")
 

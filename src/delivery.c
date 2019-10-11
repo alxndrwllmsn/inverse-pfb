@@ -165,13 +165,12 @@ void actually_read_vcs(FILE *file, uint8_t data[],int data_length, struct parame
                                                             the vcs file*/
 {
     //open file and variable Initialisation
-    uint8_t *buffer;
+    uint8_t buffer;
     int i;
 
-    buffer = (uint8_t *)malloc(sizeof(uint8_t));
     //Read file into buffer as uint8_t
     for(i=0;i<data_length;i++){
-        if(fread(buffer, sizeof(uint8_t), 1, file) != 1)
+        if(fread(&buffer, sizeof(uint8_t), 1, file) != 1)
         {
             perror("Error reading data file\n");
             exit(22);
@@ -180,8 +179,6 @@ void actually_read_vcs(FILE *file, uint8_t data[],int data_length, struct parame
         data[i] = buffer & 0xf;
         data[i+1] = (buffer >> 4) & 0xf;
     }
-    //free memory
-    free(buffer);
 }
 
 void read_filter(char *filename, int16_t fdata[],unsigned long filter_length)

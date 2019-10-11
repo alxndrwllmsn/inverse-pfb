@@ -168,17 +168,17 @@ void actually_read_vcs(FILE *file, uint8_t data[],int data_length, struct parame
     uint8_t *buffer;
     int i;
 
-    buffer = (uint8_t *)malloc(2*sizeof(uint8_t));
+    buffer = (uint8_t *)malloc(sizeof(uint8_t));
     //Read file into buffer as uint8_t
-    for(i=0;i<data_length;i=i+2){
-        if(fread(buffer, 2 * sizeof(uint8_t), 1, file) != 1)
+    for(i=0;i<data_length;i++){
+        if(fread(buffer, sizeof(uint8_t), 1, file) != 1)
         {
             perror("Error reading data file\n");
             exit(22);
         }
-        fseek(file, pars.nchannels*pars.ntiles*4 - 2,SEEK_CUR);
-        data[i] = buffer[0];
-        data[i+1] = buffer[1];
+        fseek(file, pars.nchannels*pars.ntiles*2 - 1,SEEK_CUR);
+        data[i] = buffer & 0xf;
+        data[i+1] = (buffer >> 4) & 0xf;
     }
     //free memory
     free(buffer);

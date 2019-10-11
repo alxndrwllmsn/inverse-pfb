@@ -63,7 +63,9 @@ def setup_out_dir(outdir, chanC):
     print("setting up output directories: {}/{}".format(outdir, chanC))
     owd = os.getcwd()
     os.chdir(outdir)
-    os.mkdir("{}".format(chanC))
+    newpath = "{}".format(chanC)
+    if not os.path.exists(newpath):
+        os.mkdir(newpath)
     os.chdir(owd)
 
 
@@ -114,7 +116,8 @@ def write_info_c(directory, fchanC, nchanC, cPrefix, outdir):
     file.close()
     os.chdir(owd)
     os.chdir(outdir)
-    os.mkdir("all")
+    if not os.path.exists("all"):
+        os.mkdir("all")
     os.chdir(owd)
 
 

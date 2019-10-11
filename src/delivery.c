@@ -176,8 +176,8 @@ void actually_read_vcs(FILE *file, uint8_t data[],int data_length, struct parame
             exit(22);
         }
         fseek(file, pars.nchannels*pars.ntiles*2 - 1,SEEK_CUR);
-        data[i] = buffer & 0xf;
-        data[i+1] = (buffer >> 4) & 0xf;
+        data[i*2] = buffer & 0xf;
+        data[i*2+1] = (buffer >> 4) & 0xf;
     }
 }
 

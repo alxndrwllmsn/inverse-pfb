@@ -169,7 +169,7 @@ void actually_read_vcs(FILE *file, uint8_t data[],int data_length, struct parame
     int i;
 
     //Read file into buffer as uint8_t
-    for(i=0;i<data_length;i++){
+    for(i=0;i<data_length/2;i++){
         if(fread(&buffer, sizeof(uint8_t), 1, file) != 1)
         {
             perror("Error reading data file\n");

@@ -163,7 +163,7 @@ int main(int argc, char *argv[])
         if(vcs == 1)
         {
             fseek(dfiles[i], ((i*pars.ntiles + pars.tile)*2 + pars.pol)*2, SEEK_SET);
-            printf("%i\n",((i*pars.ntiles + pars.tile)*2 + pars.pol)*2);
+            printf("%d\n",ftell(dfiles[i]));
         }
         else
         {

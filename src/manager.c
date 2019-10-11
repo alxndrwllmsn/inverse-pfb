@@ -147,7 +147,7 @@ int main(int argc, char *argv[])
         }
         sprintf(fname,"%s/%s",pars.datadir,fnames[i]);
         strcpy(fnames[i],fname);
-        printf("%s\n",fnames[i]);
+        // printf("%s\n",fnames[i]);
     }
     fclose(info);
     //open each data file
@@ -163,14 +163,14 @@ int main(int argc, char *argv[])
         if(vcs == 1)
         {
             fseek(dfiles[i], ((i*pars.ntiles + pars.tile)*2 + pars.pol), SEEK_SET);
-            printf("%ld\n",ftell(dfiles[i]));
+            // printf("%ld\n",ftell(dfiles[i]));
         }
         else
         {
             fseek(dfiles[i], 4096+102400*2*pars.ntiles, SEEK_SET);
             fseek(dfiles[i], 102400*(2*pars.tile+pars.pol), SEEK_CUR);
         }
-        printf("Moved marker into position\n");
+        // printf("Moved marker into position\n");
     }
 
     //check number of sections (based on memory)
@@ -220,7 +220,7 @@ int main(int argc, char *argv[])
     strcpy(infotextcat,pars.outputdir);
     sprintf(buffer,"/out_%d_%d.dat",pars.tile, pars.pol);
     strcat(infotextcat,buffer);
-    printf("%s\n",infotextcat);
+    // printf("%s\n",infotextcat);
     ofile = fopen(infotextcat,"w");
     // sprintf(buffer,"%s/norms_%d_%d.txt",pars.outputdir,pars.tile,pars.pol);
     // norms = fopen(buffer,"w");
@@ -235,7 +235,7 @@ int main(int argc, char *argv[])
         //read section from file
         for (k=0;k<nchans;k++)
         {
-            printf("Reading in channel %d\n",k+1);
+            // printf("Reading in channel %d\n",k+1);
             if(vcs==1)
             {
                 actually_read_vcs(dfiles[k], chandata, sectionSize*2, pars);

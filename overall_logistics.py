@@ -76,10 +76,10 @@ def run_logistics(srun, parfile, pars, vcs):
     if srun:
         logrun[0] = "srun"
         logrun.insert(1, "--export=all")
-        logrun.insert(3, "-N")
-        logrun.insert(4, "{}".format(nnodes))
-        logrun.insert(5, "-c")
-        logrun.insert(6, "1")
+        logrun.insert(4, "-N")
+        logrun.insert(5, "{}".format(nnodes))
+        logrun.insert(6, "-c")
+        logrun.insert(7, "1")
     if vcs:
         logrun.append("-v")
 
@@ -96,7 +96,7 @@ def rearrange(fchanC, nchanC, pars, prefix, datadir): # note: nsamples is set fo
     owd = os.getcwd()
     for i in range(fchanC, fchanC + nchanC):
         directory = "{}/{}".format(pars["outputdir"], i)
-        rearrange_as_module(directory, 1280000, pars["ntiles"], "{}/{}/{}_{}.sub".format(owd, datadir, prefix, i))
+        rearrange_as_module(directory, 1280000, pars["ntiles"], "{}/{}_{}.sub".format(datadir, prefix, i))
 
 
 def coarse_inversion(pars, fchanC, nchanC, cPrefix, srun, parfile, vcs):

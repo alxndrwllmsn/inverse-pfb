@@ -4,7 +4,7 @@ import os
 import numpy as np
 from logistics import readpars
 from rearrangedata import rearrange_as_module
-
+from time import time
 
 def fine_inversion(datadir, fprefix, parfile, fchanC, nchanC, nchanF, srun, vcs):
     for k in range(fchanC, fchanC + nchanC):
@@ -129,16 +129,24 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     print("Reading parameter file: {}".format(args.parfile))
+    start = time()
     mpars = readpars(args.parfile)
+    print (time()-start)
 
     print("running fine inversion")
+    start = time()
     pars = fine_inversion(mpars["datadir"], mpars["fine_prefix"], mpars["fine_parfile"], int(mpars["coarse_first_chan"]),
                           int(mpars["coarse_nchans"]), int(mpars["fine_nchans"]), int(mpars["srun"]), 1)
+    print(time()-start)
 
     print("rearranging data for re - input")
+    start = time()
     rearrange(int(mpars["coarse_first_chan"]), int(mpars["coarse_nchans"]), pars, mpars["coarse_prefix"], mpars["datadir"])
+    print(time() - start)
 
     print("running coarse inversion")
+    start = time()
     coarse_inversion(pars, int(mpars["coarse_first_chan"]), int(mpars["coarse_nchans"]), mpars["coarse_prefix"], int(mpars["srun"]),
                      mpars["coarse_parfile"], 0)
+    print(time()-start)
 

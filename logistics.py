@@ -61,7 +61,7 @@ def worker(rank, pars, t, p):
             # check for clipping
         if amp != 1:
             # print("Value clipped, repeating with lower amplification.")
-            if pars['amplification'] == 1:
+            if int(pars['amplification']) == 1:
                 repeat = False
                 print("amplification is already 1, cannot reduce anymore (there is an issue).")
             else:

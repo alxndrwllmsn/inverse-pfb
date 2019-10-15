@@ -13,7 +13,7 @@ def fine_inversion(datadir, fprefix, pars, fchanC, nchanC, nchanF, srun, vcs):
         write_info_f(datadir, fprefix, k, nchanF)
         write_parfile(pars, k)
         setup_out_dir(pars["outputdir"], k)
-        run_logistics(srun, "tmpparfileF.txt", pars, vcs)
+        run_logistics(srun, "tmppars/tmpparfileF_{}.txt".format(k), pars, vcs)
 
 
 def write_info_f(directory, prefix, chan, nchanF):
@@ -31,7 +31,7 @@ def write_info_f(directory, prefix, chan, nchanF):
 
 def write_parfile(pars, chanC):
     print("writing temporary parameter file F")
-    file = open("tmpparfileF.txt", "w")
+    file = open("tmppars/tmpparfileF_{}.txt".format(chanC), "w")
     file.write("""{}    {}
 {}  {}
 {}  {}
@@ -146,7 +146,7 @@ if __name__ == '__main__':
     mpars = readpars(args.parfile)
     pars = readpars(mpars["fine_parfile"])
     print(time()-start)
-    
+
     print("running fine inversion")
     start = time()
     if args.fine:

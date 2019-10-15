@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
     FILE *dfiles[nchans];
 
     ds = find_downsampled(fchans,firstchan, nchans);
-    printf("Downsampling to %d channels (with conjugate),\nLow channel: %d, High channel: %d\n",ds.factor*2, ds.low, ds.high );
+    // printf("Downsampling to %d channels (with conjugate),\nLow channel: %d, High channel: %d\n",ds.factor*2, ds.low, ds.high );
     //polyphase pad and fft filter
     ntaps = (int)flength/fchans;
     fact2 = ds.factor*2;
@@ -231,7 +231,7 @@ int main(int argc, char *argv[])
     //loop over sections-> for each section
     for(i = 0;i<nsections;i++)
     {
-        printf("Starting section %d\n",i+1);
+        // printf("Starting section %d\n",i+1);
         //read section from file
         for (k=0;k<nchans;k++)
         {
@@ -307,7 +307,7 @@ int main(int argc, char *argv[])
         /*perform ipfb
         {
             perform ifft*/
-        printf("Performing iFFT\n");
+        // printf("Performing iFFT\n");
         for(n=0;n<sectionSize;n++)
         {
             for(k=0;k<fact2;k++)
@@ -367,7 +367,7 @@ int main(int argc, char *argv[])
 
                 ifft section
             }*/
-        printf("Performing convolution\n");
+        // printf("Performing convolution\n");
         for(r=0;r<fact2;r++)
         {
             for(n=0;n<wholeSection;n++)
@@ -417,7 +417,7 @@ int main(int argc, char *argv[])
         //write normalisation factor to file
         // fprintf(norms, "%d\n",imin);
         //write section to file
-        printf("Writing section %d\n",i+1);
+        // printf("Writing section %d\n",i+1);
         fwrite(odata, sectionSize * 2 * fact2 *sizeof *odata, 1, ofile);
 
     }

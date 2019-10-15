@@ -227,7 +227,7 @@ void write_output(char filename[],int8_t array[],int arraysize,char mode[2])
     of = fopen(filename, mode);
 
     //write
-    printf("number of elements written: %d\n",arraysize );
+    // printf("number of elements written: %d\n",arraysize );
     fwrite(array,arraysize * sizeof *array, 1, of);
     fclose(of);
 }

@@ -6,14 +6,14 @@ from logistics import readpars
 from rearrangedata import rearrange_as_module
 from time import time
 
-def fine_inversion(datadir, fprefix, parfile, fchanC, nchanC, nchanF, srun, vcs):
+
+def fine_inversion(datadir, fprefix, pars, fchanC, nchanC, nchanF, srun, vcs):
     for k in range(fchanC, fchanC + nchanC):
         print("Coarse Channel: {}".format(k))
         write_info_f(datadir, fprefix, k, nchanF)
-        pars = write_parfile(parfile, k)
+        write_parfile(pars, k)
         setup_out_dir(pars["outputdir"], k)
         run_logistics(srun, "tmpparfileF.txt", pars, vcs)
-    return pars
 
 
 def write_info_f(directory, prefix, chan, nchanF):
@@ -29,9 +29,8 @@ def write_info_f(directory, prefix, chan, nchanF):
     os.chdir(owd)
 
 
-def write_parfile(parfile, chanC):
+def write_parfile(pars, chanC):
     print("writing temporary parameter file F")
-    pars = readpars(parfile)
     file = open("tmpparfileF.txt", "w")
     file.write("""{}    {}
 {}  {}
@@ -56,7 +55,6 @@ def write_parfile(parfile, chanC):
                  'pol', 0))
 
     file.close()
-    return pars
 
 
 def setup_out_dir(outdir, chanC):
@@ -125,28 +123,48 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument("parfile", help="The master parfile for entire run.")
+    parser.add_argument("-f", "--fine", help="Run the fine inversion (default is to run everything)",
+                        action="store_true")
+    parser.add_argument("-r", "--rearrange", help="Run data rearrangement (default is to run everything)",
+                        action="store_true")
+    parser.add_argument("-c", "--coarse", help="Run the coarse inversion (default is to run everything)",
+                        action="store_true")
 
     args = parser.parse_args()
+    mcontrol = False
+
+    if args.fine or args.rearrange or args.coarse:
+        mcontrol = True
+
+    if not mcontrol:
+        args.fine = True
+        args.rearrange = True
+        args.coarse = True
 
     print("Reading parameter file: {}".format(args.parfile))
     start = time()
     mpars = readpars(args.parfile)
-    print (time()-start)
-
+    pars = readpars(mpars["fine_parfile"])
+    print(time()-start)
+    
     print("running fine inversion")
     start = time()
-    pars = fine_inversion(mpars["datadir"], mpars["fine_prefix"], mpars["fine_parfile"], int(mpars["coarse_first_chan"]),
-                          int(mpars["coarse_nchans"]), int(mpars["fine_nchans"]), int(mpars["srun"]), 1)
+    if args.fine:
+        fine_inversion(mpars["datadir"], mpars["fine_prefix"], pars, int(mpars["coarse_first_chan"]),
+                       int(mpars["coarse_nchans"]), int(mpars["fine_nchans"]), int(mpars["srun"]), 1)
     print(time()-start)
 
     print("rearranging data for re - input")
     start = time()
-    rearrange(int(mpars["coarse_first_chan"]), int(mpars["coarse_nchans"]), pars, mpars["coarse_prefix"], mpars["datadir"])
+    if args.rearrange:
+        rearrange(int(mpars["coarse_first_chan"]), int(mpars["coarse_nchans"]), pars, mpars["coarse_prefix"],
+                  mpars["datadir"])
     print(time() - start)
 
     print("running coarse inversion")
     start = time()
-    coarse_inversion(pars, int(mpars["coarse_first_chan"]), int(mpars["coarse_nchans"]), mpars["coarse_prefix"], int(mpars["srun"]),
-                     mpars["coarse_parfile"], 0)
+    if args.coarse:
+        coarse_inversion(pars, int(mpars["coarse_first_chan"]), int(mpars["coarse_nchans"]), mpars["coarse_prefix"],
+                         int(mpars["srun"]), mpars["coarse_parfile"], 0)
     print(time()-start)
 

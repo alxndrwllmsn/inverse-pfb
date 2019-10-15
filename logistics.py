@@ -58,10 +58,9 @@ def worker(rank, pars, t, p):
             out = e.output.decode('utf-8').split('\n')[-2].split(' ')
             print(e.output.decode('utf-8'))
             amp = float(out[1])
-            print(amp)
-        # check for clipping
+            # check for clipping
         if amp != 1:
-            print("Value clipped, repeating with lower amplification.")
+            # print("Value clipped, repeating with lower amplification.")
             if pars['amplification'] == 1:
                 repeat = False
                 print("amplification is already 1, cannot reduce anymore (there is an issue).")
@@ -115,7 +114,7 @@ def run_MPI(args, trange):
         p = p.reshape(nstreams)
         print("tile: {}, pol: {}".format(t[rank], p[rank]))
         worker(rank, pars, t[rank], p[rank])
-        print("processor {} complete\n".format(rank))
+        # print("processor {} complete\n".format(rank))
 
     comm.barrier()
 

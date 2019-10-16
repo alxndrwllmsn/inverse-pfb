@@ -4,8 +4,8 @@ import subprocess as sp
 import argparse
 
 
-def genParFile(pars, t, p):
-    file = open("tmppars/tmppar{}_{}.txt".format(t, p), "w")
+def genParFile(pars, t, p, pref):
+    file = open("{}/tmppar{}_{}.txt".format(pref, t, p), "w")
     file.write("""{}    {}
 {}  {}
 {}  {}
@@ -39,7 +39,7 @@ def clipCheck(pars, t, p):
         return False
 
 
-def worker(rank, pars, t, p):
+def worker(rank, pars, t, p, pref):
     repeat = True
     count = 0
     while repeat:
@@ -49,9 +49,9 @@ def worker(rank, pars, t, p):
         print("amplification: {}, processor: {}".format(pars['amplification'], rank))
         # run ipfb on parfile
         if args.vcs:
-            ipfbcall = ['./ipfb', 'tmppars/tmppar{}_{}.txt'.format(t, p), '1']
+            ipfbcall = ['./ipfb', '{}/tmppar{}_{}.txt'.format(pref, t, p), '1']
         else:
-            ipfbcall = ['./ipfb', 'tmppars/tmppar{}_{}.txt'.format(t, p), '0']
+            ipfbcall = ['./ipfb', '{}/tmppar{}_{}.txt'.format(pref, t, p), '0']
         try:
             sp.check_output(ipfbcall, stderr=sp.STDOUT)
         except sp.CalledProcessError as e:
@@ -113,19 +113,21 @@ def run_MPI(args, trange):
         t = t.reshape(nstreams)
         p = p.reshape(nstreams)
         print("tile: {}, pol: {}".format(t[rank], p[rank]))
-        worker(rank, pars, t[rank], p[rank])
+        worker(rank, pars, t[rank], p[rank], args.tmppardir)
         # print("processor {} complete\n".format(rank))
-
-    comm.barrier()
+    if not args.nowait:
+        comm.barrier()
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("parfile", help="The parameter file from which to read.")
+    parser.add_argument("tmppardir", help="The location for storing temp parameter files.")
     parser.add_argument("-t", "--tiles", help="The range of tiles to process (as present within the input file,"
                                               " eg. '-t 0,12')", default=None)
     parser.add_argument("-m", "--mpi", help="Use mpi rather than multiprocess", action="store_true")
     parser.add_argument("-v", "--vcs", help="The input is vcs format", action="store_true")
+    parser.add_argument("-n", "--nowait", help="Do not wait for process to finish", action="store_true")
     args = parser.parse_args()
 
     if args.tiles is None:

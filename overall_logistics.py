@@ -13,7 +13,12 @@ def fine_inversion(datadir, fprefix, pars, fchanC, nchanC, nchanF, srun, vcs):
         write_info_f(datadir, fprefix, k, nchanF)
         write_parfile(pars, k)
         setup_out_dir(pars["outputdir"], k)
-        run_logistics(srun, "tmppars/tmpparfileF_{}.txt".format(k), pars, vcs)
+        setup_out_dir("tmppars", k)
+        if k == fchanC +nchanC - 1:
+            nowait = False
+        else:
+            nowait = True
+        run_logistics(srun, "tmppars/tmpparfileF_{}.txt".format(k), pars, vcs, "tmppars/{}".format(k), nowait)
 
 
 def write_info_f(directory, prefix, chan, nchanF):
@@ -67,11 +72,11 @@ def setup_out_dir(outdir, chanC):
     os.chdir(owd)
 
 
-def run_logistics(srun, parfile, pars, vcs):
+def run_logistics(srun, parfile, pars, vcs, parprefix, nowait):
     print("running ipfb logistics")
     nprocs = int(pars['ntiles'])*2
     nnodes = int(np.ceil(nprocs/24))
-    logrun = ["mpirun", "-n", "{}".format(nprocs), "python3", "logistics.py", "{}".format(parfile), "-t",
+    logrun = ["mpirun", "-n", "{}".format(nprocs), "python3", "logistics.py", "{}".format(parfile), "{}".format(parprefix), "-t",
               "0,{}".format(pars['ntiles']), "-m"]
     if srun:
         logrun[0] = "srun"
@@ -82,6 +87,8 @@ def run_logistics(srun, parfile, pars, vcs):
         logrun.insert(7, "1")
     if vcs:
         logrun.append("-v")
+    if nowait:
+        logrun.append("-n")
 
     try:
         output = sp.check_output(logrun, stderr=sp.STDOUT).decode()
@@ -101,7 +108,7 @@ def rearrange(fchanC, nchanC, pars, prefix, datadir): # note: nsamples is set fo
 
 def coarse_inversion(pars, fchanC, nchanC, cPrefix, srun, parfile, vcs):
     write_info_c(pars["datadir"], fchanC, nchanC, cPrefix, pars["outputdir"])
-    run_logistics(srun, parfile, pars, vcs)
+    run_logistics(srun, parfile, pars, vcs, "tmppars", False)
 
 
 def write_info_c(directory, fchanC, nchanC, cPrefix, outdir):

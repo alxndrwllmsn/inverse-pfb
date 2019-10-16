@@ -44,7 +44,7 @@ def worker(rank, pars, t, p, pref):
     count = 0
     while repeat:
         # create parfile
-        genParFile(pars, t, p)
+        genParFile(pars, t, p, pref)
         amp = 1
         print("amplification: {}, processor: {}".format(pars['amplification'], rank))
         # run ipfb on parfile

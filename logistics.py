@@ -1,5 +1,4 @@
 import numpy as np
-import os
 import subprocess as sp
 import argparse
 
@@ -117,6 +116,19 @@ def run_MPI(args, trange):
         # print("processor {} complete\n".format(rank))
     if not args.nowait:
         comm.barrier()
+
+
+def module_parser(argarr):
+    parser = argparse.ArgumentParser()
+    parser.add_argument("parfile", help="The parameter file from which to read.")
+    parser.add_argument("tmppardir", help="The location for storing temp parameter files.")
+    parser.add_argument("-n", "--nowait", help="Do not wait for process to finish", action="store_true")
+    parser.add_argument("-t", "--tiles", help="The range of tiles to process (as present within the input file,"
+                                              " eg. '-t 0,12')", default=None)
+    parser.add_argument("-m", "--mpi", help="Use mpi rather than multiprocess", action="store_true")
+    parser.add_argument("-v", "--vcs", help="The input is vcs format", action="store_true")
+    parser.parse_args(argarr)
+    return args
 
 
 if __name__ == '__main__':

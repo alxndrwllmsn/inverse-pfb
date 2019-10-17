@@ -1,20 +1,23 @@
 import argparse
-import subprocess as sp
 import os
 import numpy as np
-from logistics import readpars
+from logistics import readpars, module_parser, run_MPI
 from rearrangedata import rearrange_as_module
 from time import time
+from mpi4py import MPI
 
 
 def fine_inversion(datadir, fprefix, pars, fchanC, nchanC, nchanF, srun, vcs):
+    comm = MPI.COMM_WORLD
     for k in range(fchanC, fchanC + nchanC):
         print("Coarse Channel: {}".format(k))
-        write_info_f(datadir, fprefix, k, nchanF)
-        write_parfile(pars, k)
-        setup_out_dir(pars["outputdir"], k)
-        setup_out_dir("tmppars", k)
-        if k == fchanC +nchanC - 1:
+        if comm.Get_rank() == 0:
+            write_info_f(datadir, fprefix, k, nchanF)
+            write_parfile(pars, k)
+            setup_out_dir(pars["outputdir"], k)
+            setup_out_dir("tmppars", k)
+        comm.barrier()
+        if k == fchanC + nchanC - 1:
             nowait = False
         else:
             nowait = True
@@ -74,40 +77,32 @@ def setup_out_dir(outdir, chanC):
 
 def run_logistics(srun, parfile, pars, vcs, parprefix, nowait):
     print("running ipfb logistics")
-    nprocs = int(pars['ntiles'])*2
-    nnodes = int(np.ceil(nprocs/24))
-    logrun = ["mpirun", "-n", "{}".format(nprocs), "python3", "logistics.py", "{}".format(parfile), "{}".format(parprefix), "-t",
-              "0,{}".format(pars['ntiles']), "-m"]
-    if srun:
-        logrun[0] = "srun"
-        logrun.insert(1, "--export=all")
-        logrun.insert(4, "-N")
-        logrun.insert(5, "{}".format(nnodes))
-        logrun.insert(6, "-c")
-        logrun.insert(7, "1")
+    logrun = ["{}".format(parfile), "{}".format(parprefix), "-t", "0,{}".format(pars['ntiles'])]
+
     if vcs:
         logrun.append("-v")
     if nowait:
         logrun.append("-n")
 
-    try:
-        output = sp.check_output(logrun, stderr=sp.STDOUT).decode()
-        print(output)
-    except sp.CalledProcessError as e:
-        output = e.output.decode()
-        print(output)
-        raise sp.CalledProcessError
+    logargs = module_parser(logrun)
+    run_MPI(logargs, np.array([0, int(pars['ntiles'])], dtype=np.int))
 
 
 def rearrange(fchanC, nchanC, pars, prefix, datadir): # note: nsamples is set for 1 second files
-    owd = os.getcwd()
+    comm = MPI.COMM_WORLD
+    rank = comm.Get_rank()
     for i in range(fchanC, fchanC + nchanC):
-        directory = "{}/{}".format(pars["outputdir"], i)
-        rearrange_as_module(directory, 1280000, pars["ntiles"], "{}/{}_{}.sub".format(datadir, prefix, i))
+        if rank == (i-fchanC):
+            directory = "{}/{}".format(pars["outputdir"], i)
+            rearrange_as_module(directory, 1280000, pars["ntiles"], "{}/{}_{}.sub".format(datadir, prefix, i))
+    comm.barrier()
 
 
 def coarse_inversion(pars, fchanC, nchanC, cPrefix, srun, parfile, vcs):
-    write_info_c(pars["datadir"], fchanC, nchanC, cPrefix, pars["outputdir"])
+    comm = MPI.COMM_WORLD
+    if comm.Get_rank() == 0:
+        write_info_c(pars["datadir"], fchanC, nchanC, cPrefix, pars["outputdir"])
+    comm.barrier()
     run_logistics(srun, parfile, pars, vcs, "tmppars", False)
 
 
@@ -147,6 +142,10 @@ if __name__ == '__main__':
         args.fine = True
         args.rearrange = True
         args.coarse = True
+
+    comm = MPI.COMM_WORLD
+    rank = comm.Get_rank()
+    nprocs = comm.Get_size()
 
     print("Reading parameter file: {}".format(args.parfile))
     start = time()

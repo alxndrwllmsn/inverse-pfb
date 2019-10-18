@@ -17,11 +17,8 @@ def fine_inversion(datadir, fprefix, pars, fchanC, nchanC, nchanF, srun, vcs):
             setup_out_dir(pars["outputdir"], k)
             setup_out_dir("tmppars", k)
         comm.barrier()
-        if k == fchanC + nchanC - 1:
-            nowait = False
-        else:
-            nowait = True
-        run_logistics(srun, "tmppars/tmpparfileF_{}.txt".format(k), pars, vcs, "tmppars/{}".format(k), nowait)
+        run_logistics(srun, "tmppars/tmpparfileF_{}.txt".format(k), pars, vcs, "tmppars/{}".format(k), True)
+    comm.barrier()
 
 
 def write_info_f(directory, prefix, chan, nchanF):

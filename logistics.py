@@ -38,19 +38,19 @@ def clipCheck(pars, t, p):
         return False
 
 
-def worker(rank, pars, t, p, pref):
+def worker(rank, pars, t, p, args):
     repeat = True
     count = 0
     while repeat:
         # create parfile
-        genParFile(pars, t, p, pref)
+        genParFile(pars, t, p, args.tmppardir)
         amp = 1
         print("amplification: {}, processor: {}".format(pars['amplification'], rank))
         # run ipfb on parfile
         if args.vcs:
-            ipfbcall = ['./ipfb', '{}/tmppar{}_{}.txt'.format(pref, t, p), '1']
+            ipfbcall = ['./ipfb', '{}/tmppar{}_{}.txt'.format(args.tmppardir, t, p), '1']
         else:
-            ipfbcall = ['./ipfb', '{}/tmppar{}_{}.txt'.format(pref, t, p), '0']
+            ipfbcall = ['./ipfb', '{}/tmppar{}_{}.txt'.format(args.tmppardir, t, p), '0']
         try:
             sp.check_output(ipfbcall, stderr=sp.STDOUT)
         except sp.CalledProcessError as e:
@@ -112,7 +112,7 @@ def run_MPI(args, trange):
         t = t.reshape(nstreams)
         p = p.reshape(nstreams)
         print("tile: {}, pol: {}".format(t[rank], p[rank]))
-        worker(rank, pars, t[rank], p[rank], args.tmppardir)
+        worker(rank, pars, t[rank], p[rank], args)
         # print("processor {} complete\n".format(rank))
     if not args.nowait:
         comm.barrier()
@@ -127,7 +127,7 @@ def module_parser(argarr):
                                               " eg. '-t 0,12')", default=None)
     parser.add_argument("-m", "--mpi", help="Use mpi rather than multiprocess", action="store_true")
     parser.add_argument("-v", "--vcs", help="The input is vcs format", action="store_true")
-    parser.parse_args(argarr)
+    args = parser.parse_args(argarr)
     return args
 
 

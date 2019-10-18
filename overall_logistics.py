@@ -88,8 +88,9 @@ def run_logistics(srun, parfile, pars, vcs, parprefix, nowait):
 def rearrange(fchanC, nchanC, pars, prefix, datadir): # note: nsamples is set for 1 second files
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
+    nprocs = comm.Get_size()
     for i in range(fchanC, fchanC + nchanC):
-        if rank == (i-fchanC):
+        if rank == (i-fchanC)% nprocs:
             directory = "{}/{}".format(pars["outputdir"], i)
             rearrange_as_module(directory, 1280000, pars["ntiles"], "{}/{}_{}.sub".format(datadir, prefix, i))
     comm.barrier()

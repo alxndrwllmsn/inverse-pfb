@@ -176,8 +176,8 @@ int main(int argc, char *argv[])
     //check number of sections (based on memory)
     if(vcs== 1)
     {
-        nsections = 1;
-        sectionSize = 10000;
+        nsections = 25;
+        sectionSize = 400;
     }
     else
     {

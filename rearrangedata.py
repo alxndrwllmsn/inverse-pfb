@@ -17,6 +17,7 @@ def rearrange_as_module(directory, nsamples, ntiles, output_file):
 def main(args):
     data = np.zeros((args.nsamples//51200, args.ntiles, 2, 51200, 2), dtype=np.int8)
     owd = os.getcwd()
+    print(args.directory)
     os.chdir(args.directory)
 
     for tile in range(args.ntiles):
@@ -24,7 +25,8 @@ def main(args):
             data[:, tile, pol, :, :] = np.fromfile("out_{}_{}.dat".format(tile, pol), dtype=np.int8).reshape(args.nsamples//51200, 51200, 2)
 
     header = np.zeros(4096+102400*2*args.ntiles, np.int8)
-    file = open(args.output_file, "w")
+    print(owd, args.output_file)
+    file = open("{}/{}".format(owd,args.output_file), "w")
     header.tofile(file)
     data.tofile(file)
     file.close()

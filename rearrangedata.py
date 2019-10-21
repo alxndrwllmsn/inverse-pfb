@@ -16,20 +16,24 @@ def rearrange_as_module(directory, nsamples, ntiles, output_file):
     :type output_file: str
     """
     parser = ap.ArgumentParser()
-    parser.add_argument("directory")
-    parser.add_argument("nsamples", type=np.int)
-    parser.add_argument("ntiles", type=np.int)
-    parser.add_argument("output_file")
+    parser.add_argument("directory", help="The directory of the out files or the name of the vcs input files")
+    parser.add_argument("nsamples", help="The number of samples in the input file", type=np.int)
+    parser.add_argument("ntiles", help="The number of tiles to process", type=np.int)
+    parser.add_argument("output_file", help="The name of the output file")
+    parser.add_argument("-v", "--vcs", help="use this flag to change the mode to read in vcs data (set directory to be "
+                                            "the filename of the vcs file", action="store_true")
 
     args = parser.parse_args([directory, "{}".format(nsamples), "{}".format(ntiles), output_file])
-    main(args)
+    if not args.vcs:
+        out_to_htr_vcs(args)
+    else:
+        vcs_to_htr(args)
 
 
-def main(args):
+def out_to_htr_vcs(args):
     """
     Rearranges the files within the directory specified to a single file rearranged for input into ./ipfb
     :param args: the list of arguments specified above
-    :type args: object
     """
     data = np.zeros((args.nsamples//51200, args.ntiles, 2, 51200, 2), dtype=np.int8)
     owd = os.getcwd()
@@ -49,12 +53,31 @@ def main(args):
     os.chdir(owd)
 
 
+def vcs_to_htr(args):
+    """
+    Converts the vcs file into one that can be read into ./ipfb more efficiently, unfortunately it is too slow.
+    :param args: the script input arguments
+    """
+    data = np.fromfile(args.directory, dtype=np.int8)
+    filesize = data.shape[0]
+    print(filesize)
+    nchans = ((filesize//args.nsamples)//args.ntiles)//2
+    print(nchans)
+    data = data.reshape(args.nsamples, nchans, args.ntiles, 2)
+    data = np.transpose(data, (1, 2, 3, 0))
+    data.tofile(args.output_file)
+
 if __name__ == '__main__':
     parser = ap.ArgumentParser()
-    parser.add_argument("directory")
-    parser.add_argument("nsamples", type=np.int)
-    parser.add_argument("ntiles", type=np.int)
-    parser.add_argument("output_file")
+    parser.add_argument("directory", help="The directory of the out files or the name of the vcs input files")
+    parser.add_argument("nsamples", help="The number of samples in the input file", type=np.int)
+    parser.add_argument("ntiles", help="The number of tiles to process", type=np.int)
+    parser.add_argument("output_file", help="The name of the output file")
+    parser.add_argument("-v", "--vcs", help="use this flag to change the mode to read in vcs data (set directory to be "
+                                            "the filename of the vcs file", action="store_true")
 
     args = parser.parse_args()
-    main(args)
+    if not args.vcs:
+        out_to_htr_vcs(args)
+    else:
+        vcs_to_htr(args)

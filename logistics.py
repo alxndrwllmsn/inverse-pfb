@@ -4,6 +4,16 @@ import argparse
 
 
 def genParFile(pars, t, p, pref):
+    """
+    Generates a temporary parameter file to be used by ./ipfb
+    :param pars: A set of parameters to transcribe into a new file
+    :param t: The tile number
+    :type t: int
+    :param p: The polarisation number (either 0 or 1)
+    :type p: int
+    :param pref: The prefix for the directory to store the parameter files
+    :type pref: str
+    """
     file = open("{}/tmppar{}_{}.txt".format(pref, t, p), "w")
     file.write("""{}    {}
 {}  {}
@@ -31,6 +41,13 @@ def genParFile(pars, t, p, pref):
 
 
 def clipCheck(pars, t, p):
+    """
+    Unused Definition
+    :param pars:
+    :param t:
+    :param p:
+    :rtype: bool
+    """
     n = np.loadtxt("{}/norms_{}_{}.txt".format(pars['outputdir'], t, p))
     if n.sum() > 0:
         return True
@@ -39,6 +56,18 @@ def clipCheck(pars, t, p):
 
 
 def worker(rank, pars, t, p, args):
+    """
+    This is the main worker that runs the ./ipfb program with the correct arguments
+    :param rank: the process rank
+    :type rank: int
+    :param pars: the parameters for input to genParFile
+    :type pars: dict
+    :param t: the tile number
+    :type t: int
+    :param p: the polarisation (0 or 1)
+    :type p: int
+    :param args: the script input arguments
+    """
     repeat = True
     count = 0
     while repeat:
@@ -73,6 +102,13 @@ def worker(rank, pars, t, p, args):
 
 
 def readpars(parfile):
+    """
+    Reads a set of parameter files and inputs to a dictionary
+    :param parfile: the name of the parameter file
+    :type parfile: str
+    :returns: the parameters and names as keys
+    :rtype: dict
+    """
     file = open(parfile, 'r')
     pardict = {}
     for line in file:
@@ -84,6 +120,12 @@ def readpars(parfile):
 
 
 def runMultiProcess(args, trange):
+    """
+    This runs the code using multiprocess, currently untested.
+    :param args: the script input args
+    :param trange: a range of tiles [min_t,max_t]
+    :type trange: list, int
+    """
     import multiprocessing as mp
 
     # read parameters from parfile
@@ -98,6 +140,12 @@ def runMultiProcess(args, trange):
 
 
 def run_MPI(args, trange):
+    """
+    Run's MPI using the worker defined above
+    :param args: script input arguments
+    :param trange: a range of tiles [min_t, max_t]
+    :type trange: list, int
+    """
     from mpi4py import MPI
     pars = readpars(args.parfile)
     comm = MPI.COMM_WORLD
@@ -119,6 +167,12 @@ def run_MPI(args, trange):
 
 
 def module_parser(argarr):
+    """
+    Parses a set of parameters for if the script is run as a module
+    :param argarr: an array of input arguments to parse
+    :type argarr: list, str
+    :return: a list of arguments as an object
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("parfile", help="The parameter file from which to read.")
     parser.add_argument("tmppardir", help="The location for storing temp parameter files.")

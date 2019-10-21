@@ -4,6 +4,17 @@ import os
 
 
 def rearrange_as_module(directory, nsamples, ntiles, output_file):
+    """
+    Runs the script to be called from another
+    :param directory: the directory of the input files to be reformatted
+    :type directory: str
+    :param nsamples: the number of samples in the files to be reformatted
+    :type nsamples: int
+    :param ntiles: the number of tiles in the files
+    :type ntiles: int
+    :param output_file: the output file name after reformatting
+    :type output_file: str
+    """
     parser = ap.ArgumentParser()
     parser.add_argument("directory")
     parser.add_argument("nsamples", type=np.int)
@@ -15,6 +26,11 @@ def rearrange_as_module(directory, nsamples, ntiles, output_file):
 
 
 def main(args):
+    """
+    Rearranges the files within the directory specified to a single file rearranged for input into ./ipfb
+    :param args: the list of arguments specified above
+    :type args: object
+    """
     data = np.zeros((args.nsamples//51200, args.ntiles, 2, 51200, 2), dtype=np.int8)
     owd = os.getcwd()
     print(args.directory)

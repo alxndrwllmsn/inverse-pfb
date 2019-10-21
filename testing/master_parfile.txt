@@ -1,0 +1,9 @@
+datadir		testing/tesdata_cr
+fine_prefix test_test0
+fine_parfile    testing/fine_parfile.txt
+coarse_first_chan   96
+coarse_nchans   24
+fine_nchans 128
+srun    1
+coarse_prefix   test_test0
+coarse_parfile  testing/coarse_parfile.txt

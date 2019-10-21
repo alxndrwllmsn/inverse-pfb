@@ -1,0 +1,11 @@
+datadir		testing/testdata_cr
+filterfile	testing/CoarseCoeff.dat
+outputdir	testing/test_obs/all
+filter_length	4096
+filter_chans	512
+amplification	20
+nchannels	24
+firstchan	96
+ntiles		12
+tile		0
+pol		0

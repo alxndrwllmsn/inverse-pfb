@@ -1,0 +1,11 @@
+datadir		testing/tesdata_cr
+filterfile	testing/pfbcoefffixed.txt
+outputdir	testing/test_obs
+filter_length	1536
+filter_chans	128
+amplification	20
+nchannels	128
+firstchan	0
+ntiles		12
+tile		0
+pol		0

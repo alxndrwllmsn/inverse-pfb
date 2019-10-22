@@ -2,6 +2,11 @@
 
 A new implementation of the inverse PFB.
 
+## Dependencies
+1. python 3.6 or later
+2. mpi4py 2.0.0 (if you want to use MPI rather than multiprocessing)
+3. fftw 3.3.8 or later
+
 ## Compilation
 1. go into src directory and type:
 ```bash

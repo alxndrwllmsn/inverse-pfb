@@ -42,7 +42,11 @@ def main(args):
 
     header = np.zeros(4096+102400*2*args.ntiles, np.int8)
     print(owd, args.output_file)
-    file = open("{}/{}".format(owd,args.output_file), "w")
+    if owd in args.output_file:
+        fstring = args.output_file
+    else:
+        fstring = "{}/{}".format(owd, args.output_file)
+    file = open(fstring, "w")
     header.tofile(file)
     data.tofile(file)
     file.close()

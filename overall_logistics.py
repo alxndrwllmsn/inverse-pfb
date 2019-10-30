@@ -1,13 +1,13 @@
 import argparse
 import os
 import numpy as np
-from logistics import readpars, module_parser, run_MPI
+from logistics import readpars, module_parser, run_MPI, runMultiProcess
 from rearrangedata import rearrange_as_module
 from time import time
-from mpi4py import MPI
+import multiprocessing as mp
 
 
-def fine_inversion(datadir, fprefix, pars, fchanC, nchanC, nchanF, vcs):
+def fine_inversion(datadir, fprefix, pars, fchanC, nchanC, nchanF, vcs, args):
     """
     Runs the fine pfb inversion
     :param datadir: directory of input data
@@ -24,18 +24,33 @@ def fine_inversion(datadir, fprefix, pars, fchanC, nchanC, nchanF, vcs):
     :type nchanF: int
     :param vcs: specifies vcs flag for ./ipfb
     :type vcs: bool
+    :param args: the command line arguments
     """
-    comm = MPI.COMM_WORLD
+    amp = args.multiprocessing
+    if not amp:
+        comm = MPI.COMM_WORLD
     for k in range(fchanC, fchanC + nchanC):
         print("Coarse Channel: {}".format(k))
-        if comm.Get_rank() == 0:
+        if not amp:
+            if comm.Get_rank() == 0:
+                write_info_f(datadir, fprefix, k, nchanF)
+                write_parfile(pars, k)
+                setup_out_dir(pars["outputdir"], k)
+                setup_out_dir("tmppars", k)
+        else:
             write_info_f(datadir, fprefix, k, nchanF)
             write_parfile(pars, k)
             setup_out_dir(pars["outputdir"], k)
             setup_out_dir("tmppars", k)
+            run_logistics("tmppars/tmpparfileF_{}.txt".format(k), pars, vcs, "tmppars/{}".format(k), False, args)
+        if not amp:
+            comm.barrier()
+            run_logistics("tmppars/tmpparfileF_{}.txt".format(k), pars, vcs, "tmppars/{}".format(k), True, args)
+    if not amp:
         comm.barrier()
-        run_logistics("tmppars/tmpparfileF_{}.txt".format(k), pars, vcs, "tmppars/{}".format(k), True)
-    comm.barrier()
+    else:
+        for p in mp.active_children():
+            p.join()
 
 
 def write_info_f(directory, prefix, chan, nchanF):
@@ -114,7 +129,7 @@ def setup_out_dir(outdir, chanC):
     os.chdir(owd)
 
 
-def run_logistics(parfile, pars, vcs, parprefix, nowait):
+def run_logistics(parfile, pars, vcs, parprefix, nowait, args):
     """
     Sends the parameters to the inverse pfb code and runs it
     :param parfile: the parameter file name
@@ -125,8 +140,9 @@ def run_logistics(parfile, pars, vcs, parprefix, nowait):
     :type vcs: bool
     :param parprefix: the prefix for the parameter files
     :type parprefix: str
-    :param nowait: sends nowait flag to run_MPI
+    :param nowait: sends nowait flag to run_MPI or MP
     :type nowait: bool
+    :param args: the command line arguments
     """
     print("running ipfb logistics")
     logrun = ["{}".format(parfile), "{}".format(parprefix), "-t", "0,{}".format(pars['ntiles'])]
@@ -137,10 +153,13 @@ def run_logistics(parfile, pars, vcs, parprefix, nowait):
         logrun.append("-n")
 
     logargs = module_parser(logrun)
-    run_MPI(logargs, np.array([0, int(pars['ntiles'])], dtype=np.int))
+    if not args.multiprocessing:
+        run_MPI(logargs, np.array([0, int(pars['ntiles'])], dtype=np.int))
+    else:
+        runMultiProcess(logargs, np.array([0, int(pars['ntiles'])], dtype=np.int))
 
 
-def rearrange(fchanC, nchanC, pars, prefix, datadir): # note: nsamples is set for 1 second files
+def rearrange(fchanC, nchanC, pars, prefix, datadir, args): # note: nsamples is set for 1 second files
     """
     Run's the rearrangedata.py as a module
     :param fchanC: the first coarse channel
@@ -153,18 +172,25 @@ def rearrange(fchanC, nchanC, pars, prefix, datadir): # note: nsamples is set fo
     :type prefix: str
     :param datadir: the directory of the output files
     :type datadir: str
+    :param args: the command line arguments
     """
-    comm = MPI.COMM_WORLD
-    rank = comm.Get_rank()
-    nprocs = comm.Get_size()
+    if not args.multiprocessing:
+        comm = MPI.COMM_WORLD
+        rank = comm.Get_rank()
+        nprocs = comm.Get_size()
     for i in range(fchanC, fchanC + nchanC):
-        if rank == (i-fchanC)% nprocs:
+        if not args.multiprocessing:
+            if rank == (i-fchanC)% nprocs:
+                directory = "{}/{}".format(pars["outputdir"], i)
+                rearrange_as_module(directory, 1280000, pars["ntiles"], "{}/{}_{}.sub".format(datadir, prefix, i))
+        else:
             directory = "{}/{}".format(pars["outputdir"], i)
             rearrange_as_module(directory, 1280000, pars["ntiles"], "{}/{}_{}.sub".format(datadir, prefix, i))
-    comm.barrier()
+    if not args.multiprocessing:
+        comm.barrier()
 
 
-def coarse_inversion(pars, fchanC, nchanC, cPrefix, parfile, vcs):
+def coarse_inversion(pars, fchanC, nchanC, cPrefix, parfile, vcs, args):
     """
     Facilitates the coarse channel inversion
     :param pars: the paramters read from the master parameter file
@@ -179,12 +205,16 @@ def coarse_inversion(pars, fchanC, nchanC, cPrefix, parfile, vcs):
     :type parfile: str
     :param vcs: the vcs flag to send to run_logistics
     :type vcs: bool
+    :param args: the command line arguments
     """
-    comm = MPI.COMM_WORLD
-    if comm.Get_rank() == 0:
+    if not args.multiprocessing:
+        comm = MPI.COMM_WORLD
+        if comm.Get_rank() == 0:
+            write_info_c(pars["datadir"], fchanC, nchanC, cPrefix, pars["outputdir"])
+        comm.barrier()
+    else:
         write_info_c(pars["datadir"], fchanC, nchanC, cPrefix, pars["outputdir"])
-    comm.barrier()
-    run_logistics(parfile, pars, vcs, "tmppars", False)
+    run_logistics(parfile, pars, vcs, "tmppars", False, args)
 
 
 def write_info_c(directory, fchanC, nchanC, cPrefix, outdir):
@@ -225,6 +255,8 @@ if __name__ == '__main__':
                         action="store_true")
     parser.add_argument("-c", "--coarse", help="Run the coarse inversion (default is to run everything)",
                         action="store_true")
+    parser.add_argument("-p", "--multiprocessing", help="run using python multiprocessing rather than MPI",
+                        action="store_true")
 
     args = parser.parse_args()
     mcontrol = False
@@ -236,10 +268,11 @@ if __name__ == '__main__':
         args.fine = True
         args.rearrange = True
         args.coarse = True
-
-    comm = MPI.COMM_WORLD
-    rank = comm.Get_rank()
-    nprocs = comm.Get_size()
+    if not args.multiprocessing:
+        from mpi4py import MPI
+        comm = MPI.COMM_WORLD
+        rank = comm.Get_rank()
+        nprocs = comm.Get_size()
 
     print("Reading parameter file: {}".format(args.parfile))
     start = time()
@@ -251,20 +284,23 @@ if __name__ == '__main__':
     start = time()
     if args.fine:
         fine_inversion(mpars["datadir"], mpars["fine_prefix"], pars, int(mpars["coarse_first_chan"]),
-                       int(mpars["coarse_nchans"]), int(mpars["fine_nchans"]), True)
+                       int(mpars["coarse_nchans"]), int(mpars["fine_nchans"]), True, args)
     print(time()-start)
 
     print("rearranging data for re - input")
     start = time()
+    if args.multiprocessing:
+        for p in mp.active_children():
+            p.join()
     if args.rearrange:
         rearrange(int(mpars["coarse_first_chan"]), int(mpars["coarse_nchans"]), pars, mpars["coarse_prefix"],
-                  mpars["datadir"])
+                  mpars["datadir"], args)
     print(time() - start)
 
     print("running coarse inversion")
     start = time()
     if args.coarse:
         coarse_inversion(pars, int(mpars["coarse_first_chan"]), int(mpars["coarse_nchans"]), mpars["coarse_prefix"],
-                         mpars["coarse_parfile"], False)
+                         mpars["coarse_parfile"], False, args)
     print(time()-start)
 

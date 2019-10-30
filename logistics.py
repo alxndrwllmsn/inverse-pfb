@@ -83,8 +83,8 @@ def worker(rank, pars, t, p, args):
         try:
             sp.check_output(ipfbcall, stderr=sp.STDOUT)
         except sp.CalledProcessError as e:
-            out = e.output.decode('utf-8').split('\n')[-2].split(' ')
             print(e.output.decode('utf-8'))
+            out = e.output.decode('utf-8').split('\n')[-2].split(' ')
             amp = float(out[1])
             # check for clipping
         if amp != 1:
@@ -125,6 +125,7 @@ def runMultiProcess(args, trange):
     :param args: the script input args
     :param trange: a range of tiles [min_t,max_t]
     :type trange: list, int
+
     """
     import multiprocessing as mp
 
@@ -134,9 +135,12 @@ def runMultiProcess(args, trange):
     jobs = []
     for t in range(trange[0], trange[1]):
         for p in range(2):
-            proc = mp.Process(target=worker, args=(pars, t, p,))
+            proc = mp.Process(target=worker, args=(t*2+p, pars, t, p, args,))
             jobs.append(proc)
             proc.start()
+    if not args.nowait:
+        for proc in jobs:
+            proc.join()
 
 
 def run_MPI(args, trange):

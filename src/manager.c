@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
                                 -1,-1,-1};
     struct dsampled ds;
     int ntaps, fchans, firstchan, nchans, fact2, i, r, k, n, flip, nsections,
-        sectionSize, wholeSection;
+        sectionSize, wholeSection, maxint;
     long int flength;
     int16_t *fdata;
     uint8_t *chandata;
@@ -239,22 +239,24 @@ int main(int argc, char *argv[])
             if(vcs==1)
             {
                 actually_read_vcs(dfiles[k], chandata, sectionSize*2, pars);
+		maxint = 8;
             }
             else
             {
                 read_vcs(dfiles[k], chandata, sectionSize*2);
+		maxint = 128;
             }
             for (n=0;n<sectionSize;n++)
             {
                 tmpr = (float)(int)chandata[2*n];
-                if(tmpr >= 128)
+                if(tmpr >= maxint)
                 {
-                    tmpr -= 256;
+                    tmpr -= maxint*2;
                 }
                 tmpi = (float)(int)chandata[2*n+1];
-                if(tmpi >= 128)
+                if(tmpi >= maxint)
                 {
-                    tmpi -= 256;
+                    tmpi -= maxint*2;
                 }
                 if(flip)
                 {
@@ -301,7 +303,7 @@ int main(int argc, char *argv[])
             }
         }
         #ifdef DEBUG
-            FILE *test4 = fopen("testing/datareadtest.dat", "w");
+            FILE *test4 = fopen("datareadtest.dat", "w");
             fwrite(data, 2 * wholeSection * fact2 * sizeof*data, 1, test4);
             fclose(test4);
         #endif

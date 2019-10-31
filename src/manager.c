@@ -300,10 +300,11 @@ int main(int argc, char *argv[])
                 fseek(dfiles[k], 102400*(2*pars.ntiles-1), SEEK_CUR);
             }
         }
-
-        // FILE *test4 = fopen("testing/datareadtest.dat", "w");
-        // fwrite(data, 2 * wholeSection * fact2 * sizeof(float), 1, test4);
-        // fclose(test4);
+        #ifdef DEBUG
+            FILE *test4 = fopen("testing/datareadtest.dat", "w");
+            fwrite(data, 2 * wholeSection * fact2 * sizeof(float), 1, test4);
+            fclose(test4);
+        #endif
         /*perform ipfb
         {
             perform ifft*/

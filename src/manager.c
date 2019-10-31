@@ -302,7 +302,7 @@ int main(int argc, char *argv[])
         }
         #ifdef DEBUG
             FILE *test4 = fopen("testing/datareadtest.dat", "w");
-            fwrite(data, 2 * wholeSection * fact2 * sizeof(float), 1, test4);
+            fwrite(data, 2 * wholeSection * fact2 * sizeof*data, 1, test4);
             fclose(test4);
         #endif
         /*perform ipfb

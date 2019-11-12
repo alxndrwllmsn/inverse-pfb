@@ -258,34 +258,41 @@ int main(int argc, char *argv[])
                 {
                     tmpi -= maxint*2;
                 }
-                if(flip)
+                if(vcs == 1)
                 {
-                    data[(2*(n+ntaps))*fact2+(ds.high - firstchan - k-1)] = tmpr;
-                    data[(2*(n+ntaps)+1)*fact2+(ds.high - firstchan - k-1)] = tmpi;
-
-                    if (k < (ds.high-ds.low-1))
-                    {
-                        data[(2*(n+ntaps))*fact2+(fact2 - (ds.high - firstchan - k-1))] = tmpr;
-                        data[(2*(n+ntaps)+1)*fact2+(fact2 - (ds.high - firstchan - k-1))] = -tmpi;
-                    }
+                    data[(2*(n+ntaps))*fact2+k] = tmpr;
+                    data[(2*(n+ntaps)+1)*fact2+k] = tmpi;
                 }
                 else
                 {
-                    data[(2*(n+ntaps))*fact2+(k+firstchan - ds.low)] = tmpr;
-                    data[(2*(n+ntaps)+1)*fact2+(k+firstchan - ds.low)] = tmpi;
-                    if (k > 0)
+                    if(flip)
                     {
-                        data[(2*(n+ntaps))*fact2+(fact2 - (k+firstchan - ds.low))] = tmpr;
-                        data[(2*(n+ntaps)+1)*fact2+(fact2 - (k+firstchan - ds.low))] = -tmpi;
-                        int temp = (2*(n+ntaps)+1)*fact2+(fact2 - (k+firstchan - ds.low));
-                        if (temp >= wholeSection * fact2 * 2)
+                        data[(2*(n+ntaps))*fact2+(ds.high - firstchan - k-1)] = tmpr;
+                        data[(2*(n+ntaps)+1)*fact2+(ds.high - firstchan - k-1)] = tmpi;
+
+                        if (k < (ds.high-ds.low-1))
                         {
-                            printf("index:%d n:%d k:%d i:%d\n",temp,n,k,i);
+                            data[(2*(n+ntaps))*fact2+(fact2 - (ds.high - firstchan - k-1))] = tmpr;
+                            data[(2*(n+ntaps)+1)*fact2+(fact2 - (ds.high - firstchan - k-1))] = -tmpi;
+                        }
+                    }
+                    else
+                    {
+                        data[(2*(n+ntaps))*fact2+(k+firstchan - ds.low)] = tmpr;
+                        data[(2*(n+ntaps)+1)*fact2+(k+firstchan - ds.low)] = tmpi;
+                        if (k > 0)
+                        {
+                            data[(2*(n+ntaps))*fact2+(fact2 - (k+firstchan - ds.low))] = tmpr;
+                            data[(2*(n+ntaps)+1)*fact2+(fact2 - (k+firstchan - ds.low))] = -tmpi;
+                            int temp = (2*(n+ntaps)+1)*fact2+(fact2 - (k+firstchan - ds.low));
+                            if (temp >= wholeSection * fact2 * 2)
+                            {
+                                printf("index:%d n:%d k:%d i:%d\n",temp,n,k,i);
+                            }
                         }
                     }
                 }
-
-
+                
             }
             #ifdef DEBUG
             {

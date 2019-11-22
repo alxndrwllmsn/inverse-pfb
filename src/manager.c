@@ -292,7 +292,7 @@ int main(int argc, char *argv[])
                         }
                     }
                 }
-                
+
             }
             #ifdef DEBUG
             {
@@ -320,10 +320,15 @@ int main(int argc, char *argv[])
         // printf("Performing iFFT\n");
         for(n=0;n<sectionSize;n++)
         {
-            for(k=0;k<fact2;k++)
+            for(k=(int)(fact2/2);k<fact2;k++)
             {
-                rdata[k] = data[(2*(n+ntaps))*fact2+k];
-                idata[k] = data[(2*(n+ntaps) + 1)*fact2+k];
+                rdata[k] = data[(2*(n+ntaps))*fact2+k-(int)(fact2/2)];
+                idata[k] = data[(2*(n+ntaps) + 1)*fact2+k-(int)(fact2/2)];
+            }
+            for(k=0;k<(int)(fact2/2);k++)
+            {
+                rdata[k] = data[(2*(n+ntaps))*fact2+k+(int)(fact2/2)];
+                idata[k] = data[(2*(n+ntaps) + 1)*fact2+k+(int)(fact2/2)];
             }
 
             fft(rdata, idata, fact2, rdata, idata, p);
@@ -378,25 +383,25 @@ int main(int argc, char *argv[])
                 ifft section
             }*/
         // printf("Performing convolution\n");
-        for(r=0;r<fact2;r++)
-        {
-            for(n=0;n<wholeSection;n++)
-            {
-                rndata[n] = data[(n*2)*fact2 + r];
-                indata[n] = data[(n*2 + 1)*fact2 + r];
-            }
-            for(n=0;n<ntaps;n++)
-            {
-                predata[(n*2)*fact2 + r] = rndata[n+sectionSize];
-                predata[(n*2 + 1)*fact2 + r] = indata[n+sectionSize];
-            }
-            fftconvolve(rndata, indata, wholeSection, qrm[r], ntaps, rndata, indata, q, m);
-            for(n=0;n<sectionSize;n++)
-            {
-                data[((n+ntaps)*2)*fact2 + r] = rndata[n+ntaps]*pars.ampl/fmaxi;
-                data[((n+ntaps)*2 + 1)*fact2 + r] = indata[n+ntaps]*pars.ampl/fmaxi;
-            }
-        }
+        // for(r=0;r<fact2;r++)
+        // {
+        //     for(n=0;n<wholeSection;n++)
+        //     {
+        //         rndata[n] = data[(n*2)*fact2 + r];
+        //         indata[n] = data[(n*2 + 1)*fact2 + r];
+        //     }
+        //     for(n=0;n<ntaps;n++)
+        //     {
+        //         predata[(n*2)*fact2 + r] = rndata[n+sectionSize];
+        //         predata[(n*2 + 1)*fact2 + r] = indata[n+sectionSize];
+        //     }
+        //     fftconvolve(rndata, indata, wholeSection, qrm[r], ntaps, rndata, indata, q, m);
+        //     for(n=0;n<sectionSize;n++)
+        //     {
+        //         data[((n+ntaps)*2)*fact2 + r] = rndata[n+ntaps]*pars.ampl/fmaxi;
+        //         data[((n+ntaps)*2 + 1)*fact2 + r] = indata[n+ntaps]*pars.ampl/fmaxi;
+        //     }
+        // }
 
         #ifdef DEBUG
         {

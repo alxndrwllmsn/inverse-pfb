@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     //Check arguments
     if(argc < 3)
     {
-        printf("usage: ipfbrun parameterfilename vcs\n");
+        printf("usage: ipfb parameterfilename vcs\n");
         return 1;
     }
 
@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        nsections = 25; //Change this back to 200 after testing
+        nsections = 25;
         sectionSize = 51200;
     }
     wholeSection = sectionSize + ntaps;
@@ -216,6 +216,7 @@ int main(int argc, char *argv[])
     rndata = (float *)malloc(wholeSection * sizeof *rndata);
     indata = (float *)malloc(wholeSection * sizeof *indata);
     predata = calloc(2 * ntaps * fact2, sizeof *predata);
+    memset(predata,0,2 * ntaps * fact2 * sizeof *predata);
 
     strcpy(infotextcat,pars.outputdir);
     sprintf(buffer,"/out_%d_%d.dat",pars.tile, pars.pol);
@@ -227,7 +228,7 @@ int main(int argc, char *argv[])
 
     odata = (int8_t *)malloc(sectionSize * fact2 * 2 *sizeof *odata);
 
-
+    printf("vcs: %d\n",vcs);
     //loop over sections-> for each section
     for(i = 0;i<nsections;i++)
     {
@@ -235,16 +236,16 @@ int main(int argc, char *argv[])
         //read section from file
         for (k=0;k<nchans;k++)
         {
-            // printf("Reading in channel %d\n",k+1);
+
             if(vcs==1)
             {
                 actually_read_vcs(dfiles[k], chandata, sectionSize*2, pars);
-		maxint = 8;
+		        maxint = 8;
             }
             else
             {
                 read_vcs(dfiles[k], chandata, sectionSize*2);
-		maxint = 128;
+		        maxint = 128;
             }
             for (n=0;n<sectionSize;n++)
             {
@@ -296,7 +297,7 @@ int main(int argc, char *argv[])
             }
             #ifdef DEBUG
             {
-                if((k==0))
+                if((k==64) && (i==0))
                 {
                     FILE *test3 = fopen("chandatareadtest.dat", "w");
                     fwrite(chandata, 2 * sectionSize * sizeof(uint8_t), 1, test3);
@@ -310,9 +311,14 @@ int main(int argc, char *argv[])
             }
         }
         #ifdef DEBUG
-            FILE *test4 = fopen("datareadtest.dat", "w");
-            fwrite(data, 2 * wholeSection * fact2 * sizeof*data, 1, test4);
-            fclose(test4);
+        {
+            if (i==0)
+            {
+                FILE *test4 = fopen("datareadtest.dat", "w");
+                fwrite(data, 2 * wholeSection * fact2 * sizeof*data, 1, test4);
+                fclose(test4);
+            }
+        }
         #endif
         /*perform ipfb
         {
@@ -320,17 +326,27 @@ int main(int argc, char *argv[])
         // printf("Performing iFFT\n");
         for(n=0;n<sectionSize;n++)
         {
-            for(k=(int)(fact2/2);k<fact2;k++)
+            if (vcs==1)
             {
-                rdata[k] = data[(2*(n+ntaps))*fact2+k-(int)(fact2/2)];
-                idata[k] = data[(2*(n+ntaps) + 1)*fact2+k-(int)(fact2/2)];
+                for(k=(int)(fact2/2);k<fact2;k++)
+                {
+                    rdata[k] = data[(2*(n+ntaps))*fact2+k-(int)(fact2/2)];
+                    idata[k] = data[(2*(n+ntaps) + 1)*fact2+k-(int)(fact2/2)];
+                }
+                for(k=0;k<(int)(fact2/2);k++)
+                {
+                    rdata[k] = data[(2*(n+ntaps))*fact2+k+(int)(fact2/2)];
+                    idata[k] = data[(2*(n+ntaps) + 1)*fact2+k+(int)(fact2/2)];
+                }
             }
-            for(k=0;k<(int)(fact2/2);k++)
+            else
             {
-                rdata[k] = data[(2*(n+ntaps))*fact2+k+(int)(fact2/2)];
-                idata[k] = data[(2*(n+ntaps) + 1)*fact2+k+(int)(fact2/2)];
+                for(k=0;k<fact2;k++)
+                {
+                    rdata[k] = data[(2*(n+ntaps))*fact2+k];
+                    idata[k] = data[(2*(n+ntaps) + 1)*fact2+k];
+                }
             }
-
             fft(rdata, idata, fact2, rdata, idata, p);
             for(r=0;r<fact2;r++)
             {
@@ -382,36 +398,39 @@ int main(int argc, char *argv[])
 
                 ifft section
             }*/
-        // printf("Performing convolution\n");
-        // for(r=0;r<fact2;r++)
-        // {
-        //     for(n=0;n<wholeSection;n++)
-        //     {
-        //         rndata[n] = data[(n*2)*fact2 + r];
-        //         indata[n] = data[(n*2 + 1)*fact2 + r];
-        //     }
-        //     for(n=0;n<ntaps;n++)
-        //     {
-        //         predata[(n*2)*fact2 + r] = rndata[n+sectionSize];
-        //         predata[(n*2 + 1)*fact2 + r] = indata[n+sectionSize];
-        //     }
-        //     fftconvolve(rndata, indata, wholeSection, qrm[r], ntaps, rndata, indata, q, m);
-        //     for(n=0;n<sectionSize;n++)
-        //     {
-        //         data[((n+ntaps)*2)*fact2 + r] = rndata[n+ntaps]*pars.ampl/fmaxi;
-        //         data[((n+ntaps)*2 + 1)*fact2 + r] = indata[n+ntaps]*pars.ampl/fmaxi;
-        //     }
-        // }
+        printf("Performing convolution\n");
+        for(r=0;r<fact2;r++)
+        {
+            for(n=0;n<wholeSection;n++)
+            {
+                rndata[n] = data[(n*2)*fact2 + r];
+                indata[n] = data[(n*2 + 1)*fact2 + r];
+            }
+            for(n=0;n<ntaps;n++)
+            {
+                predata[(n*2)*fact2 + r] = rndata[n+sectionSize];
+                predata[(n*2 + 1)*fact2 + r] = indata[n+sectionSize];
+            }
+            // fftconvolve(rndata, indata, wholeSection, qrm[r], ntaps, rndata, indata, q, m);
+            for(n=0;n<sectionSize;n++)
+            {
+                data[((n+ntaps)*2)*fact2 + r] = rndata[n+ntaps]*pars.ampl;//fmaxi;
+                data[((n+ntaps)*2 + 1)*fact2 + r] = indata[n+ntaps]*pars.ampl;//fmaxi;
+            }
+        }
 
         #ifdef DEBUG
         {
-            FILE *test7 = fopen("predatatest.dat", "w");
-            fwrite(predata, 2 * ntaps * fact2 * sizeof(float), 1, test7);
-            fclose(test7);
+            if (i==0)
+            {
+                FILE *test7 = fopen("predatatest.dat", "w");
+                fwrite(predata, 2 * ntaps * fact2 * sizeof(float), 1, test7);
+                fclose(test7);
 
-            FILE *test8 = fopen("dataconvtest.dat", "w");
-            fwrite(data, 2 * wholeSection * fact2 * sizeof(float), 1, test8);
-            fclose(test8);
+                FILE *test8 = fopen("dataconvtest.dat", "w");
+                fwrite(data, 2 * wholeSection * fact2 * sizeof(float), 1, test8);
+                fclose(test8);
+            }
         }
         #endif
         for(r=0;r<fact2;r++)

@@ -411,11 +411,11 @@ int main(int argc, char *argv[])
                 predata[(n*2)*fact2 + r] = rndata[n+sectionSize];
                 predata[(n*2 + 1)*fact2 + r] = indata[n+sectionSize];
             }
-            // fftconvolve(rndata, indata, wholeSection, qrm[r], ntaps, rndata, indata, q, m);
+            fftconvolve(rndata, indata, wholeSection, qrm[r], ntaps, rndata, indata, q, m);
             for(n=0;n<sectionSize;n++)
             {
-                data[((n+ntaps)*2)*fact2 + r] = rndata[n+ntaps]*pars.ampl;//fmaxi;
-                data[((n+ntaps)*2 + 1)*fact2 + r] = indata[n+ntaps]*pars.ampl;//fmaxi;
+                data[((n+ntaps)*2)*fact2 + r] = rndata[n+ntaps]*pars.ampl/fmaxi;
+                data[((n+ntaps)*2 + 1)*fact2 + r] = indata[n+ntaps]*pars.ampl/fmaxi;
             }
         }
 

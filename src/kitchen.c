@@ -143,6 +143,64 @@ void fftconvolve(float rdata[], float idata[], int nsamples, float filter[], int
     fftw_free(outc);
 }
 
+void rfftconvolve(float rdata[], int nsamples, float filter[], int flength,
+    float outAr[], fftw_plan p, fftw_plan q)
+{
+    int ntotal = nsamples;
+    int i;
+
+    fftw_complex *outd, *outf, *inc;
+    double *ind, *inf, *outc;
+
+    ind = (double*) fftw_malloc(sizeof(double) * ntotal);
+    outd = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * (int)(ntotal/2+1));
+
+    for(i=0;i<nsamples;i++)
+    {
+        ind[i] = rdata[i];
+    }
+
+    fftw_execute_dft(p, ind, outd);
+    fftw_free(ind);
+
+    inf = (double*) fftw_malloc(sizeof(double) * ntotal);
+    outf = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * (int)(ntotal/2+1));
+
+    for(i=0;i<flength;i++)
+    {
+        inf[i] = filter[i];
+    }
+    for(i=flength;i<ntotal;i++)
+    {
+        inf[i] = 0;
+    }
+
+    fftw_execute_dft(p, inf, outf);
+    fftw_free(inf);
+
+    inc = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * (int)(ntotal/2+1));
+    outc = (double*) fftw_malloc(sizeof(double) * ntotal);
+
+    for(i=0;i<(ntotal/2+1);i++)
+    {
+        inc[i][0] = outd[i][0]*outf[i][0] - outd[i][1]*outf[i][1];
+        inc[i][1] = outd[i][0]*outf[i][1] + outd[i][1]*outf[i][0];
+    }
+
+    fftw_free(outd);
+    fftw_free(outf);
+
+    fftw_execute_dft(q, inc, outc);
+    fftw_free(inc);
+
+    for(i=0;i<ntotal;i++)
+    {
+        outAr[i] = (float)outc[i][0]/ntotal;
+    }
+
+    fftw_free(outc);
+}
+
 void fft(float rdata[], float idata[], int nsamples, float odata[], float oidata[],const fftw_plan p)
 {
     fftw_complex *in, *out;
@@ -163,6 +221,32 @@ void fft(float rdata[], float idata[], int nsamples, float odata[], float oidata
     {
         odata[i] = out[i][0]/nsamples;
         oidata[i] = out[i][1]/nsamples;
+    }
+
+    fftw_free(in);
+    fftw_free(out);
+}
+
+void fft_c2r(float rdata[], float idata[], int nsamples, float odata[], const fftw_plan p)
+{
+    fftw_complex *in;
+    double *out;
+    int i;
+
+    in = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * nsamples);
+    out = (double*) fftw_malloc(sizeof(double) * (nsamples-2));
+
+    for(i=0;i<nsamples;i++)
+    {
+        in[i][0] = rdata[i];
+        in[i][1] = idata[i];
+    }
+
+    fftw_execute_dft(p, in, out);
+
+    for(i=0;i<(nsamples-2);i++)
+    {
+        odata[i] = out[i]/nsamples;
     }
 
     fftw_free(in);

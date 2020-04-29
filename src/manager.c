@@ -34,15 +34,8 @@ int main(int argc, char *argv[])
     float tmpr,tmpi,fmaxi;
     int imin = 0;
     FILE *info, *ofile;
-    if(vcs==1)
-    {
-        fftw_complex *in, *out, *in1,*out1;
-    }
-    else
-    {
-        fftw_complex *in, *out1;
-        double *out, *in1;
-    }
+    fftw_complex *in, *out, *in1,*out1;
+    double *rout, *rin1;
     fftw_plan p, q, m;
 
     //read parameter file
@@ -208,6 +201,7 @@ int main(int argc, char *argv[])
     chandata = (uint8_t *)malloc(2 * sectionSize *sizeof *chandata);
 
     in = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * asize);
+    
     if(vcs==1) //distinguish the plans as either c2c (fine inversion) or c2r (coarse inversion)
     {
         out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * fact2);
@@ -216,13 +210,14 @@ int main(int argc, char *argv[])
     }
     else
     {
-        out = (double*) fftw_malloc(sizeof(double) * (2*asize-1));
+        rout = (double*) fftw_malloc(sizeof(double) * (2*asize-1));
         printf("Planning FFT's\n");
-        p = fftw_plan_dft_c2r_1d(2*asize-2, in, out, FFTW_EXHAUSTIVE);
+        p = fftw_plan_dft_c2r_1d(2*asize-2, in, rout, FFTW_EXHAUSTIVE);
     }
 
     fftw_free(in);
     fftw_free(out);
+    free(rout);
 
 
     if(vcs==1) //the fftconvolution needs to be r2c and c2r for coarse inversion
@@ -234,14 +229,16 @@ int main(int argc, char *argv[])
     }
     else
     {
-        in1 = (double*) fftw_malloc(sizeof(double) * wholeSection);
+        rin1 = (double*) fftw_malloc(sizeof(double) * wholeSection);
         out1 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * ((int)(wholeSection/2)+1));
-        q = fftw_plan_dft_r2c_1d(wholeSection,in1,out1, FFTW_EXHAUSTIVE);
-        m = fftw_plan_dft_c2r_1d(wholeSection,out1,in1, FFTW_EXHAUSTIVE);
+        q = fftw_plan_dft_r2c_1d(wholeSection,rin1,out1, FFTW_EXHAUSTIVE);
+        m = fftw_plan_dft_c2r_1d(wholeSection,out1,rin1, FFTW_EXHAUSTIVE);
     }
 
     fftw_free(in1);
     fftw_free(out1);
+    free(rin1);
+    
     printf("Saving wisdom\n");
     if(fftw_export_wisdom_to_filename("ipfbwisdom.ws")==0)
     {
@@ -436,7 +433,7 @@ int main(int argc, char *argv[])
                 {
                     for(n=0;n<ntaps;n++)
                     {
-                        data[(n*2*(asize-1) + r] = predata[n*2*(asize-1) + r];
+                        data[n*2*(asize-1) + r] = predata[n*2*(asize-1) + r];
                     }
                 }
             }
@@ -490,11 +487,11 @@ int main(int argc, char *argv[])
             {
                 for(n=0;n<wholeSection;n++)
                 {
-                    rndata[n] = data[(n*2*(asize-1) + r];
+                    rndata[n] = data[n*2*(asize-1) + r];
                 }
                 for(n=0;n<ntaps;n++)
                 {
-                    predata[(n*2*(asize-1) + r] = rndata[n+sectionSize];
+                    predata[n*2*(asize-1) + r] = rndata[n+sectionSize];
                 }
                 rfftconvolve(rndata, wholeSection, qrm[r], ntaps, rndata, q, m);
                 for(n=0;n<sectionSize;n++)

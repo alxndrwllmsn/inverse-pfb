@@ -195,7 +195,7 @@ void rfftconvolve(float rdata[], int nsamples, float filter[], int flength,
 
     for(i=0;i<ntotal;i++)
     {
-        outAr[i] = (float)outc[i][0]/ntotal;
+        outAr[i] = (float)outc[i]/ntotal;
     }
 
     fftw_free(outc);

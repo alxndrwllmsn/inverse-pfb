@@ -161,8 +161,8 @@ void read_vcs(FILE *file, uint8_t data[],int data_length) /*reads the data from
     free(buffer);
 }
 
-void actually_read_vcs(FILE *file, uint8_t data[],int data_length, struct parameters pars) /*reads the data from
-                                                            the vcs file*/
+void actually_read_vcs(FILE *file, uint8_t data[],int data_length, struct parameters pars) 
+/*reads the data from the vcs file*/
 {
     //open file and variable Initialisation
     uint8_t buffer;
@@ -182,8 +182,8 @@ void actually_read_vcs(FILE *file, uint8_t data[],int data_length, struct parame
     }
 }
 
-void read_filter(char *filename, int16_t fdata[],unsigned long filter_length)
-//Reads in the data from the specified filter file
+void read_filter(char *filename, int16_t fdata[],unsigned long filter_length) 
+/*Reads in the data from the specified filter file*/
 {
     //open file and initialise variables
     FILE *fp = fopen(filename,"r");
@@ -208,7 +208,7 @@ void read_filter(char *filename, int16_t fdata[],unsigned long filter_length)
     fclose(fp);
 }
 
-int exists(const char *fname)
+int exists(const char *fname) /*checks if the file exists*/
 {
     FILE *file;
     if ((file = fopen(fname, "r")))
@@ -219,7 +219,8 @@ int exists(const char *fname)
     return 0;
 }
 
-void write_output(char filename[],int8_t array[],int arraysize,char mode[2])
+void write_output(char filename[],int8_t array[],int arraysize,char mode[2]) 
+/*writes the array to file filename*/
 {
     //initialise variables
     FILE *of;

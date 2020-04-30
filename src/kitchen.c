@@ -160,7 +160,7 @@ void rfftconvolve(float rdata[], int nsamples, float filter[], int flength,
         ind[i] = rdata[i];
     }
 
-    fftw_execute_dft(p, ind, outd);
+    fftw_execute_dft_r2c(p, ind, outd);
     fftw_free(ind);
 
     inf = (double*) fftw_malloc(sizeof(double) * ntotal);
@@ -175,7 +175,7 @@ void rfftconvolve(float rdata[], int nsamples, float filter[], int flength,
         inf[i] = 0;
     }
 
-    fftw_execute_dft(p, inf, outf);
+    fftw_execute_dft_r2c(p, inf, outf);
     fftw_free(inf);
 
     inc = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * (int)(ntotal/2+1));
@@ -190,7 +190,7 @@ void rfftconvolve(float rdata[], int nsamples, float filter[], int flength,
     fftw_free(outd);
     fftw_free(outf);
 
-    fftw_execute_dft(q, inc, outc);
+    fftw_execute_dft_c2r(q, inc, outc);
     fftw_free(inc);
 
     for(i=0;i<ntotal;i++)
@@ -234,7 +234,7 @@ void fft_c2r(float rdata[], float idata[], int nsamples, float odata[], const ff
     int i;
 
     in = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * nsamples);
-    out = (double*) fftw_malloc(sizeof(double) * (nsamples-2));
+    out = (double*) fftw_malloc(sizeof(double) * (2*(nsamples-1)));
 
     for(i=0;i<nsamples;i++)
     {
@@ -242,9 +242,9 @@ void fft_c2r(float rdata[], float idata[], int nsamples, float odata[], const ff
         in[i][1] = idata[i];
     }
 
-    fftw_execute_dft(p, in, out);
+    fftw_execute_dft_c2r(p, in, out);
 
-    for(i=0;i<(nsamples-2);i++)
+    for(i=0;i<(2*nsamples-2);i++)
     {
         odata[i] = out[i]/nsamples;
     }

@@ -243,10 +243,9 @@ void fft_c2r(float rdata[], float idata[], int nsamples, float odata[], const ff
     }
 
     fftw_execute_dft_c2r(p, in, out);
-
     for(i=0;i<(2*nsamples-2);i++)
     {
-        odata[i] = out[i]/nsamples;
+        odata[i] = (float)out[i]/nsamples;
     }
 
     fftw_free(in);

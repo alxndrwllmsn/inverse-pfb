@@ -207,17 +207,19 @@ int main(int argc, char *argv[])
         out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * fact2);
         printf("Planning FFT's\n");
         p = fftw_plan_dft_1d(fact2, in, out, FFTW_BACKWARD, FFTW_EXHAUSTIVE);
+        fftw_free(out);
     }
     else
     {
         rout = (double*) fftw_malloc(sizeof(double) * (2*asize-1));
         printf("Planning FFT's\n");
         p = fftw_plan_dft_c2r_1d(2*asize-2, in, rout, FFTW_EXHAUSTIVE);
+        free(rout);
     }
 
     fftw_free(in);
-    fftw_free(out);
-    free(rout);
+    
+    
 
 
     if(vcs==1) //the fftconvolution needs to be r2c and c2r for coarse inversion
@@ -226,6 +228,7 @@ int main(int argc, char *argv[])
         out1 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * wholeSection);
         q = fftw_plan_dft_1d(wholeSection,in1,out1,FFTW_FORWARD, FFTW_EXHAUSTIVE);
         m = fftw_plan_dft_1d(wholeSection,in1,out1,FFTW_BACKWARD, FFTW_EXHAUSTIVE);
+        fftw_free(in1);
     }
     else
     {
@@ -233,11 +236,12 @@ int main(int argc, char *argv[])
         out1 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * ((int)(wholeSection/2)+1));
         q = fftw_plan_dft_r2c_1d(wholeSection,rin1,out1, FFTW_EXHAUSTIVE);
         m = fftw_plan_dft_c2r_1d(wholeSection,out1,rin1, FFTW_EXHAUSTIVE);
+        free(rin1);
     }
 
-    fftw_free(in1);
+    
     fftw_free(out1);
-    free(rin1);
+    
     
     printf("Saving wisdom\n");
     if(fftw_export_wisdom_to_filename("ipfbwisdom.ws")==0)
@@ -266,7 +270,7 @@ int main(int argc, char *argv[])
     // sprintf(buffer,"%s/norms_%d_%d.txt",pars.outputdir,pars.tile,pars.pol);
     // norms = fopen(buffer,"w");
 
-    odata = (int8_t *)malloc(sectionSize * (2*asize-2) *sizeof *odata);
+    odata = (int8_t *)malloc(sectionSize * (2*asize) *sizeof *odata);
 
     printf("vcs: %d\n",vcs);
     //loop over sections-> for each section
@@ -284,6 +288,7 @@ int main(int argc, char *argv[])
             }
             else
             {
+                printf("before read:%d %p\n", k, dfiles[k]);
                 read_vcs(dfiles[k], chandata, sectionSize*2);
 		        maxint = 128;
             }
@@ -364,6 +369,8 @@ int main(int argc, char *argv[])
         {
             perform ifft*/
         // printf("Performing iFFT\n");
+        printf("before ifft: %p\n", dfiles[0]);
+
         for(n=0;n<sectionSize;n++)
         {
             if (vcs==1)
@@ -392,6 +399,8 @@ int main(int argc, char *argv[])
                     rdata[k] = data[(2*(n+ntaps))*asize+k];
                     idata[k] = data[(2*(n+ntaps) + 1)*asize+k];
                 }
+                printf("in ifft loop: %d %p\n", n, dfiles[0]);
+
                 fft_c2r(rdata, idata, asize, rdata, p);
                 for(r=0;r<(2*asize-1);r++)
                 {
@@ -412,6 +421,7 @@ int main(int argc, char *argv[])
         }
         #endif
 
+        printf("before prepend: %p\n", dfiles[0]);
 
             /*prepend extra data unless it is the first section*/
         if (i > 0)
@@ -458,6 +468,7 @@ int main(int argc, char *argv[])
 
                 ifft section
             }*/
+        printf("before convolution: %p\n", dfiles[0]);
         printf("Performing convolution\n");
         if(vcs==1) // the convolution should only take in real data for the coarse inversion
         {
@@ -493,6 +504,7 @@ int main(int argc, char *argv[])
                 {
                     predata[n*2*(asize-1) + r] = rndata[n+sectionSize];
                 }
+                printf("inside convolution: %d %p\n", r, dfiles[0]);
                 rfftconvolve(rndata, wholeSection, qrm[r], ntaps, rndata, q, m);
                 for(n=0;n<sectionSize;n++)
                 {
@@ -506,7 +518,7 @@ int main(int argc, char *argv[])
             if (i==0)
             {
                 FILE *test7 = fopen("predatatest.dat", "w");
-                fwrite(predata, 2 * ntaps * asize * sizeof(float), 1, test7);
+                fwrite(predata, 2 * ntaps * (asize-1) * sizeof(float), 1, test7);
                 fclose(test7);
 
                 FILE *test8 = fopen("dataconvtest.dat", "w");
@@ -515,7 +527,7 @@ int main(int argc, char *argv[])
             }
         }
         #endif
-
+        printf("after conv: %p\n", dfiles[0]);
         if(vcs==1) // only the real data needs to be output to file for the coarse inversion
         {
             for(r=0;r<fact2;r++)
@@ -561,7 +573,6 @@ int main(int argc, char *argv[])
             // printf("Writing section %d\n",i+1);
             fwrite(odata, sectionSize * 2 * (asize-1) *sizeof *odata, 1, ofile);
         }
-
 
     }
     //clean up

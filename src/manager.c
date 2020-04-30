@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
     {
         asize = ds.factor;
     }
-    float rdata[asize],idata[asize];
+    float rdata[asize],idata[asize], rodata[2*asize-2];
     float rmax[asize];
     float imax[asize];
 
@@ -288,7 +288,6 @@ int main(int argc, char *argv[])
             }
             else
             {
-                printf("before read:%d %p\n", k, dfiles[k]);
                 read_vcs(dfiles[k], chandata, sectionSize*2);
 		        maxint = 128;
             }
@@ -369,7 +368,6 @@ int main(int argc, char *argv[])
         {
             perform ifft*/
         // printf("Performing iFFT\n");
-        printf("before ifft: %p\n", dfiles[0]);
 
         for(n=0;n<sectionSize;n++)
         {
@@ -399,13 +397,10 @@ int main(int argc, char *argv[])
                     rdata[k] = data[(2*(n+ntaps))*asize+k];
                     idata[k] = data[(2*(n+ntaps) + 1)*asize+k];
                 }
-                printf("in ifft loop: %d %p\n", n, dfiles[0]);
-
-                fft_c2r(rdata, idata, asize, rdata, p);
+                fft_c2r(rdata, idata, asize, rodata, p);
                 for(r=0;r<(2*asize-1);r++)
                 {
-                    data[(n+ntaps)*(2*asize-2) + r] = rdata[r];
-
+                    data[(n+ntaps)*(2*asize-2) + r] = rodata[r];
                 }
             }
 
@@ -415,13 +410,11 @@ int main(int argc, char *argv[])
             if (i == 0)
             {
                 FILE *test5 = fopen("dataffttest.dat", "w");
-                fwrite(data, 2 * wholeSection * asize * sizeof(float), 1, test5);
+                fwrite(data, 2 * wholeSection * asize * sizeof *data, 1, test5);
                 fclose(test5);
             }
         }
         #endif
-
-        printf("before prepend: %p\n", dfiles[0]);
 
             /*prepend extra data unless it is the first section*/
         if (i > 0)
@@ -468,7 +461,6 @@ int main(int argc, char *argv[])
 
                 ifft section
             }*/
-        printf("before convolution: %p\n", dfiles[0]);
         printf("Performing convolution\n");
         if(vcs==1) // the convolution should only take in real data for the coarse inversion
         {
@@ -504,7 +496,6 @@ int main(int argc, char *argv[])
                 {
                     predata[n*2*(asize-1) + r] = rndata[n+sectionSize];
                 }
-                printf("inside convolution: %d %p\n", r, dfiles[0]);
                 rfftconvolve(rndata, wholeSection, qrm[r], ntaps, rndata, q, m);
                 for(n=0;n<sectionSize;n++)
                 {
@@ -527,7 +518,6 @@ int main(int argc, char *argv[])
             }
         }
         #endif
-        printf("after conv: %p\n", dfiles[0]);
         if(vcs==1) // only the real data needs to be output to file for the coarse inversion
         {
             for(r=0;r<fact2;r++)

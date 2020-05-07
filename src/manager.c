@@ -604,7 +604,7 @@ int main(int argc, char *argv[])
     fftw_destroy_plan(m);
     fftw_cleanup();
 
-    for(int i=0;i<nchans;i++)
+    for( i=0;i<nchans;i++)
     {
         fclose(dfiles[i]);
     }

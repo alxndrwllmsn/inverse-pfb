@@ -159,6 +159,7 @@ def run_MPI(args, trange):
     rank = comm.Get_rank()
     nprocs = comm.Get_size()
     nstreams = 2 * (trange[1] - trange[0])
+    print(nstreams, nprocs)
     if nstreams != nprocs:
         raise ValueError("Please set the number of processors to be equal to the number of voltage streams"
                          " (i.e. 2 times the number of tiles).")

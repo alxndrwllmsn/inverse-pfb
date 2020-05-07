@@ -31,9 +31,9 @@ int main(int argc, char *argv[])
     uint8_t *chandata;
     int8_t *odata;
     float *data, *rndata, *indata, *predata;
-    float tmpr,tmpi,fmaxi;
+    float tmpr,tmpi,fmaxi, datasum;
     int imin = 0;
-    FILE *info, *ofile;
+    FILE *info, *ofile, *thresfile;
     fftw_complex *in, *out, *in1,*out1;
     double *rout, *rin1;
     fftw_plan p, q, m;
@@ -267,6 +267,9 @@ int main(int argc, char *argv[])
     strcat(infotextcat,buffer);
     // printf("%s\n",infotextcat);
     ofile = fopen(infotextcat,"w");
+    strcpy(infotextcat,pars.outputdir);
+    sprintf(buffer, "/filtered_%d_%d.dat", pars.tile, pars.pol);
+    strcat(infotextcat, buffer);
     // sprintf(buffer,"%s/norms_%d_%d.txt",pars.outputdir,pars.tile,pars.pol);
     // norms = fopen(buffer,"w");
 
@@ -543,6 +546,7 @@ int main(int argc, char *argv[])
         }
         else
         {
+            datasum = 0;
             for(r=0;r<2*(asize-1);r++)
             {
                 for(n=0;n<sectionSize;n++)
@@ -553,7 +557,27 @@ int main(int argc, char *argv[])
                         printf("Over %f\n",fabs(data[((n+ntaps)*2)*(asize-1) + r]));
                         exit(100);
                     }
+                    datasum = datasum + (data[((n+ntaps)*2)*(asize-1) + r]*data[((n+ntaps)*2)*(asize-1) + r]);
                     odata[n*2*(asize-1) + r] = (int8_t)round(data[((n+ntaps)*2)*(asize-1) + r]);
+                }
+            }
+            //calculate standard deviation
+            datasum = datasum/(2*sectionSize*(asize-1));
+            datasum = sqrt(datasum);
+            thresfile = fopen(infotextcat, "w");
+            //write locations of significant samples
+            for(r=0;r<2*(asize-1);r++)
+            {
+                for(n=0;n<sectionSize;n++)
+                {
+                    tmpi = fabs(data[((n+ntaps)*2)*(asize-1) + r])/datasum;
+                    if(tmpi >= 5.5)
+                    {
+                        tmpr = (float)(n*2*(asize-1) + r);
+                        
+                        fwrite(&tmpr, sizeof(float),1,thresfile);
+                        fwrite(&tmpi, sizeof(float),1,thresfile);
+                    }
                 }
             }
             memset(data,0,2 * wholeSection * asize * sizeof *data);

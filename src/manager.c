@@ -211,10 +211,10 @@ int main(int argc, char *argv[])
     }
     else
     {
-        rout = (double*) fftw_malloc(sizeof(double) * (2*asize-1));
+        rout = (double*) fftw_malloc(sizeof(double) * 2*(asize-1));
         printf("Planning FFT's\n");
         p = fftw_plan_dft_c2r_1d(2*asize-2, in, rout, FFTW_EXHAUSTIVE);
-        free(rout);
+        fftw_free(rout);
     }
 
     fftw_free(in);
@@ -236,7 +236,7 @@ int main(int argc, char *argv[])
         out1 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * ((int)(wholeSection/2)+1));
         q = fftw_plan_dft_r2c_1d(wholeSection,rin1,out1, FFTW_EXHAUSTIVE);
         m = fftw_plan_dft_c2r_1d(wholeSection,out1,rin1, FFTW_EXHAUSTIVE);
-        free(rin1);
+        fftw_free(rin1);
     }
 
     
@@ -270,6 +270,7 @@ int main(int argc, char *argv[])
     strcpy(infotextcat,pars.outputdir);
     sprintf(buffer, "/filtered_%d_%d.dat", pars.tile, pars.pol);
     strcat(infotextcat, buffer);
+    thresfile = fopen(infotextcat, "w");
     // sprintf(buffer,"%s/norms_%d_%d.txt",pars.outputdir,pars.tile,pars.pol);
     // norms = fopen(buffer,"w");
 
@@ -564,7 +565,6 @@ int main(int argc, char *argv[])
             //calculate standard deviation
             datasum = datasum/(2*sectionSize*(asize-1));
             datasum = sqrt(datasum);
-            thresfile = fopen(infotextcat, "w");
             //write locations of significant samples
             for(r=0;r<2*(asize-1);r++)
             {
@@ -609,6 +609,7 @@ int main(int argc, char *argv[])
         fclose(dfiles[i]);
     }
     fclose(ofile);
+    fclose(thresfile);
     // fclose(norms);
 
 }

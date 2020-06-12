@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
     {
         asize = ds.factor;
     }
-    float rdata[asize],idata[asize], rodata[2*asize-2];
+    float rdata[asize],idata[asize], rodata[2*asize];
     float rmax[asize];
     float imax[asize];
 
@@ -200,49 +200,48 @@ int main(int argc, char *argv[])
     data = calloc(wholeSection * asize * 2, sizeof *data);
     chandata = (uint8_t *)malloc(2 * sectionSize *sizeof *chandata);
 
-    in = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * asize);
     
     if(vcs==1) //distinguish the plans as either c2c (fine inversion) or c2r (coarse inversion)
     {
+        in = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * fact2);
         out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * fact2);
+
         printf("Planning FFT's\n");
         p = fftw_plan_dft_1d(fact2, in, out, FFTW_BACKWARD, FFTW_EXHAUSTIVE);
+
         fftw_free(out);
-    }
-    else
-    {
-        rout = (double*) fftw_malloc(sizeof(double) * 2*(asize-1));
-        printf("Planning FFT's\n");
-        p = fftw_plan_dft_c2r_1d(2*asize-2, in, rout, FFTW_EXHAUSTIVE);
-        fftw_free(rout);
-    }
+        fftw_free(in);
 
-    fftw_free(in);
-    
-    
-
-
-    if(vcs==1) //the fftconvolution needs to be r2c and c2r for coarse inversion
-    {
         in1 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * wholeSection);
         out1 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * wholeSection);
+
         q = fftw_plan_dft_1d(wholeSection,in1,out1,FFTW_FORWARD, FFTW_EXHAUSTIVE);
         m = fftw_plan_dft_1d(wholeSection,in1,out1,FFTW_BACKWARD, FFTW_EXHAUSTIVE);
+
         fftw_free(in1);
+        fftw_free(out1);
     }
     else
     {
+        in = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * (asize+1));
+        rout = (double*) fftw_malloc(sizeof(double) * (2*asize));
+
+        printf("Planning FFT's\n");
+        p = fftw_plan_dft_c2r_1d(2*asize, in, rout, FFTW_EXHAUSTIVE);
+
+        fftw_free(rout);
+        fftw_free(in);
+
         rin1 = (double*) fftw_malloc(sizeof(double) * wholeSection);
         out1 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * ((int)(wholeSection/2)+1));
+
         q = fftw_plan_dft_r2c_1d(wholeSection,rin1,out1, FFTW_EXHAUSTIVE);
         m = fftw_plan_dft_c2r_1d(wholeSection,out1,rin1, FFTW_EXHAUSTIVE);
+
         fftw_free(rin1);
+        fftw_free(out1);
     }
 
-    
-    fftw_free(out1);
-    
-    
     printf("Saving wisdom\n");
     if(fftw_export_wisdom_to_filename("ipfbwisdom.ws")==0)
     {
@@ -258,8 +257,8 @@ int main(int argc, char *argv[])
     }
     else
     {
-        predata = calloc(ntaps * (2*asize-2), sizeof *predata);
-        memset(predata,0,2 * ntaps * (2*asize-2) * sizeof *predata);
+        predata = calloc(ntaps * (2*asize), sizeof *predata);
+        memset(predata, 0, ntaps * (2*asize) * sizeof *predata);
     }
 
     strcpy(infotextcat,pars.outputdir);
@@ -368,9 +367,7 @@ int main(int argc, char *argv[])
             }
         }
         #endif
-        /*perform ipfb
-        {
-            perform ifft*/
+        /*perform ipfb perform ifft*/
         // printf("Performing iFFT\n");
 
         for(n=0;n<sectionSize;n++)
@@ -402,9 +399,9 @@ int main(int argc, char *argv[])
                     idata[k] = data[(2*(n+ntaps) + 1)*asize+k];
                 }
                 fft_c2r(rdata, idata, asize, rodata, p);
-                for(r=0;r<(2*asize-1);r++)
+                for(r=0;r<(2*asize);r++)
                 {
-                    data[(n+ntaps)*(2*asize-2) + r] = rodata[r];
+                    data[(n+ntaps)*(2*asize) + r] = rodata[r];
                 }
             }
 
@@ -423,7 +420,7 @@ int main(int argc, char *argv[])
             /*prepend extra data unless it is the first section*/
         if (i > 0)
         {
-            if (vcs==1) //the data and prepend array now have width 2*asize-2 and no imag component
+            if (vcs==1) //the data and prepend array now have width 2*asize and no imag component
             {
                 for(r=0;r<fact2;r++)
                 {
@@ -436,11 +433,11 @@ int main(int argc, char *argv[])
             }
             else
             {
-                for(r=0;r<(2*asize-2);r++)
+                for(r=0;r<(2*asize);r++)
                 {
                     for(n=0;n<ntaps;n++)
                     {
-                        data[n*2*(asize-1) + r] = predata[n*2*(asize-1) + r];
+                        data[n*(2*asize) + r] = predata[n*(2*asize) + r];
                     }
                 }
             }
@@ -490,20 +487,20 @@ int main(int argc, char *argv[])
         }
         else
         {
-            for(r=0;r<(2*asize-2);r++)
+            for(r=0;r<(2*asize);r++)
             {
                 for(n=0;n<wholeSection;n++)
                 {
-                    rndata[n] = data[n*2*(asize-1) + r];
+                    rndata[n] = data[n*(2*asize) + r];
                 }
                 for(n=0;n<ntaps;n++)
                 {
-                    predata[n*2*(asize-1) + r] = rndata[n+sectionSize];
+                    predata[n*(2*asize) + r] = rndata[n+sectionSize];
                 }
                 rfftconvolve(rndata, wholeSection, qrm[r], ntaps, rndata, q, m);
                 for(n=0;n<sectionSize;n++)
                 {
-                    data[(n+ntaps)*2*(asize-1) + r] = rndata[n+ntaps]*pars.ampl/fmaxi;
+                    data[(n+ntaps)*(2*asize) + r] = rndata[n+ntaps]*pars.ampl/fmaxi;
                 }
             }
         }
@@ -513,7 +510,14 @@ int main(int argc, char *argv[])
             if (i==0)
             {
                 FILE *test7 = fopen("predatatest.dat", "w");
-                fwrite(predata, 2 * ntaps * (asize-1) * sizeof(float), 1, test7);
+                if(vcs==1)
+                {
+                    fwrite(predata, 2 * ntaps * fact2 * sizeof(float), 1, test7);
+                }
+                else
+                {
+                    fwrite(predata, ntaps * (2*asize) * sizeof(float), 1, test7);
+                }
                 fclose(test7);
 
                 FILE *test8 = fopen("dataconvtest.dat", "w");
@@ -548,44 +552,58 @@ int main(int argc, char *argv[])
         else
         {
             datasum = 0;
-            for(r=0;r<2*(asize-1);r++)
+            for(r=0;r<(2*asize);r++)
             {
                 for(n=0;n<sectionSize;n++)
                 {
-                    if(fabs(data[((n+ntaps)*2)*(asize-1) + r]) > 127)
+                    if(fabs(data[((n+ntaps)*2)*asize + r]) > 127)
                     {
                         imin++;
-                        printf("Over %f\n",fabs(data[((n+ntaps)*2)*(asize-1) + r]));
+                        printf("Over %f\n",fabs(data[((n+ntaps)*2)*asize + r]));
                         exit(100);
                     }
-                    datasum = datasum + (data[((n+ntaps)*2)*(asize-1) + r]*data[((n+ntaps)*2)*(asize-1) + r]);
-                    odata[n*2*(asize-1) + r] = (int8_t)round(data[((n+ntaps)*2)*(asize-1) + r]);
+                    datasum = datasum + (data[((n+ntaps)*2)*asize + r]*data[((n+ntaps)*2)*asize + r]);
+                    odata[n*2*asize + r] = (int8_t)round(data[((n+ntaps)*2)*asize + r]);
                 }
             }
             //calculate standard deviation
-            datasum = datasum/(2*sectionSize*(asize-1));
+            datasum = datasum/(2*sectionSize*asize);
             datasum = sqrt(datasum);
             //write locations of significant samples
-            for(r=0;r<2*(asize-1);r++)
+            for(n=0;n<sectionSize;n++)
             {
-                for(n=0;n<sectionSize;n++)
+                for(r=0;r<(2*asize);r++)
                 {
-                    tmpi = fabs(data[((n+ntaps)*2)*(asize-1) + r])/datasum;
-                    if(tmpi >= 5.5)
+                    tmpi = data[((n+ntaps)*2)*asize + r]/datasum;
+                    if(fabs(tmpi) >= 5.5)
                     {
-                        tmpr = (float)(n*2*(asize-1) + r);
+                        tmpr = (float)(n*2*asize + r);
                         
                         fwrite(&tmpr, sizeof(float),1,thresfile);
                         fwrite(&tmpi, sizeof(float),1,thresfile);
                     }
                 }
             }
+            // printf("datasum %f", datasum);
+            // for(i=ntaps*2*asize;i < sectionSize*2*asize+(ntaps*2*asize); i++)
+            // {
+            //     tmpi = (float)(data[i])/datasum;
+                
+            //     if(fabs(tmpi) >= 5.5)
+            //     {
+            //         printf("tmpi %f\n", tmpi);
+            //         tmpr = (float)i;
+
+            //         fwrite(&tmpr, sizeof(float),1,thresfile);
+            //         fwrite(&tmpi, sizeof(float),1,thresfile);
+            //     }
+            // }
             memset(data,0,2 * wholeSection * asize * sizeof *data);
             //write normalisation factor to file
             // fprintf(norms, "%d\n",imin);
             //write section to file
             // printf("Writing section %d\n",i+1);
-            fwrite(odata, sectionSize * 2 * (asize-1) *sizeof *odata, 1, ofile);
+            fwrite(odata, sectionSize * 2 * asize *sizeof *odata, 1, ofile);
         }
 
     }

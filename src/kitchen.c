@@ -233,17 +233,19 @@ void fft_c2r(float rdata[], float idata[], int nsamples, float odata[], const ff
     double *out;
     int i;
 
-    in = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * nsamples);
-    out = (double*) fftw_malloc(sizeof(double) * (2*(nsamples-1)));
+    in = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * (nsamples+1));
+    out = (double*) fftw_malloc(sizeof(double) * 2*nsamples);
 
     for(i=0;i<nsamples;i++)
     {
         in[i][0] = rdata[i];
         in[i][1] = idata[i];
     }
+    in[nsamples][0] = 0.0;
+    in[nsamples][1] = 0.0;
 
     fftw_execute_dft_c2r(p, in, out);
-    for(i=0;i<(2*nsamples-2);i++)
+    for(i=0;i<(2*nsamples);i++)
     {
         odata[i] = (float)out[i]/nsamples;
     }

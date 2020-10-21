@@ -570,12 +570,12 @@ int main(int argc, char *argv[])
             datasum = datasum/(2*sectionSize*asize);
             datasum = sqrt(datasum);
             //write locations of significant samples
-            for(n=0;n<sectionSize;n++)
+            for(r=0;r<(2*asize);r++)     
             {
-                for(r=0;r<(2*asize);r++)
+                for(n=0;n<sectionSize;n++)
                 {
-                    tmpi = data[((n+ntaps)*2)*asize + r]/datasum;
-                    if(fabs(tmpi) >= 5.5)
+                    tmpi = fabs(data[((n+ntaps)*2)*asize + r])/datasum;
+                    if(tmpi >= 5.5)
                     {
                         tmpr = (float)(n*2*asize + r);
                         
@@ -584,20 +584,6 @@ int main(int argc, char *argv[])
                     }
                 }
             }
-            // printf("datasum %f", datasum);
-            // for(i=ntaps*2*asize;i < sectionSize*2*asize+(ntaps*2*asize); i++)
-            // {
-            //     tmpi = (float)(data[i])/datasum;
-                
-            //     if(fabs(tmpi) >= 5.5)
-            //     {
-            //         printf("tmpi %f\n", tmpi);
-            //         tmpr = (float)i;
-
-            //         fwrite(&tmpr, sizeof(float),1,thresfile);
-            //         fwrite(&tmpi, sizeof(float),1,thresfile);
-            //     }
-            // }
             memset(data,0,2 * wholeSection * asize * sizeof *data);
             //write normalisation factor to file
             // fprintf(norms, "%d\n",imin);

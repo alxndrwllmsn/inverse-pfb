@@ -83,7 +83,7 @@ def worker(rank, pars, t, p, args):
             ipfbcall = ['./ipfb', '{}/tmppar{}_{}.txt'.format(args.tmppardir, t, p), '0']
         try:
             out = sp.check_output(ipfbcall, stderr=sp.STDOUT)
-            print(out)
+            print(out.decode('utf-8'))
         except sp.CalledProcessError as e:
             print(e.output.decode('utf-8'))
             out = e.output.decode('utf-8').split('\n')[-2].split(' ')
@@ -135,15 +135,13 @@ def runMultiProcess(args, trange):
     # read parameters from parfile
     pars = readpars(args.parfile)
     # loop over each stream
-    jobs = []
+    pool = mp.Pool(processes=38, maxtasksperchild=38)
     for t in range(trange[0], trange[1]):
         for p in range(2):
-            proc = mp.Process(target=worker, args=(t*2+p, pars, t, p, args,))
-            jobs.append(proc)
-            proc.start()
+            pool.apply_async(worker, (t*2+p, pars, t, p, args,))
     if not args.nowait:
-        for proc in jobs:
-            proc.join()
+        pool.close()
+        pool.join()
 
 
 def run_MPI(args, trange):

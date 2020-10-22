@@ -178,16 +178,21 @@ def rearrange(fchanC, nchanC, pars, prefix, datadir, args): # note: nsamples is 
         comm = MPI.COMM_WORLD
         rank = comm.Get_rank()
         nprocs = comm.Get_size()
-    for i in range(fchanC, fchanC + nchanC):
-        if not args.multiprocessing:
+        for i in range(fchanC, fchanC + nchanC):
             if rank == (i-fchanC)% nprocs:
                 directory = "{}/{}".format(pars["outputdir"], i)
                 rearrange_as_module(directory, 1280000, pars["ntiles"], "{}/{}_{}.sub".format(datadir, prefix, i))
-        else:
-            directory = "{}/{}".format(pars["outputdir"], i)
-            rearrange_as_module(directory, 1280000, pars["ntiles"], "{}/{}_{}.sub".format(datadir, prefix, i))
-    if not args.multiprocessing:
         comm.barrier()
+    else:
+        import multiprocessing as mp
+        jobs = []
+        for i in range(fchanC, fchanC + nchanC):
+            directory = "{}/{}".format(pars["outputdir"], i)
+            proc = mp.Process(target=rearrange_as_module, args=(directory, 1280000, pars["ntiles"], "{}/{}_{}.sub".format(datadir, prefix, i),))
+            jobs.append(proc)
+            proc.start()
+        for proc in jobs:
+            proc.join()
 
 
 def coarse_inversion(pars, fchanC, nchanC, cPrefix, parfile, vcs, args):

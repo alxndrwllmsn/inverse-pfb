@@ -577,7 +577,7 @@ int main(int argc, char *argv[])
                     tmpi = data[((n+ntaps)*2)*asize + r]/datasum;
                     if(fabs(tmpi) >= 5.5)
                     {
-                        tmpr = (float)(i*sectionSize+n)*2*asize + r);
+                        tmpr = (float)((i*sectionSize+n)*2*asize + r);
                         
                         fwrite(&tmpr, sizeof(float),1,thresfile);
                         fwrite(&tmpi, sizeof(float),1,thresfile);
